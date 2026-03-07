@@ -664,7 +664,11 @@
 
   function init() {
     particles = [];
-    const count = Math.min(Math.floor(W * H / 14000), 90);
+    // Particle density: 1 particle per 14000px² keeps performance smooth on any screen;
+    // cap at 90 to avoid overloading low-end devices
+    const AREA_PER_PARTICLE = 14000;
+    const MAX_PARTICLES = 90;
+    const count = Math.min(Math.floor(W * H / AREA_PER_PARTICLE), MAX_PARTICLES);
     for (let i = 0; i < count; i++) particles.push(new Particle());
   }
 
