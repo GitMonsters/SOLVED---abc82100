@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pro-Forma Financial Model — ABC82100</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #0a0e1a;
+    --bg2:       #0f1628;
+    --bg3:       #141d35;
+    --cyan:      #00f5ff;
+    --purple:    #7c3aed;
+    --purple2:   #9d5bf0;
+    --green:     #00e676;
+    --gold:      #ffd600;
+    --red:       #ff4d6a;
+    --white:     #e8eaf6;
+    --muted:     #6b7a99;
+    --border:    rgba(0,245,255,0.15);
+    --row-alt:   rgba(255,255,255,0.03);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--white);
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(10,14,26,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 2rem;
+    height: 56px;
+  }
+  nav a.hub-link {
+    color: var(--cyan);
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: opacity 0.2s;
+  }
+  nav a.hub-link:hover { opacity: 0.75; }
+  nav .nav-title {
+    font-family: "Courier New", Courier, monospace;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    color: var(--cyan);
+    text-transform: uppercase;
+  }
+  nav .nav-badge {
+    background: linear-gradient(135deg, var(--purple), #4f46e5);
+    color: #fff;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    padding: 2px 10px;
+    border-radius: 20px;
+  }
+
+  /* ── HERO HEADER ── */
+  .hero {
+    text-align: center;
+    padding: 4rem 2rem 3rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 40% at 50% 0%, rgba(0,245,255,0.07) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 60% at 80% 50%, rgba(124,58,237,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-eyebrow {
+    font-family: "Courier New", Courier, monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.25em;
+    color: var(--cyan);
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+    animation: fadeUp 0.6s ease both;
+  }
+  .hero h1 {
+    font-size: clamp(2rem, 5vw, 3.4rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    background: linear-gradient(135deg, #ffffff 0%, var(--cyan) 50%, var(--purple2) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.75rem;
+    animation: fadeUp 0.6s 0.1s ease both;
+  }
+  .hero-sub {
+    color: var(--muted);
+    font-size: 1rem;
+    letter-spacing: 0.05em;
+    animation: fadeUp 0.6s 0.2s ease both;
+  }
+  .hero-divider {
+    width: 80px;
+    height: 3px;
+    margin: 1.5rem auto 0;
+    background: linear-gradient(90deg, var(--cyan), var(--purple));
+    border-radius: 2px;
+    animation: fadeUp 0.6s 0.3s ease both;
+  }
+
+  /* ── SECTIONS ── */
+  .section {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem;
+  }
+  .section-title {
+    font-family: "Courier New", Courier, monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--cyan);
+    margin-bottom: 0.5rem;
+  }
+  .section-heading {
+    font-size: clamp(1.3rem, 3vw, 1.9rem);
+    font-weight: 700;
+    margin-bottom: 2rem;
+    color: #fff;
+  }
+
+  /* ── CARD ── */
+  .card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  .card-inner { padding: 1.5rem; }
+
+  /* ── TABLE SHARED ── */
+  .tbl-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+  }
+  thead th {
+    background: rgba(0,245,255,0.08);
+    color: var(--cyan);
+    font-weight: 700;
+    font-family: "Courier New", Courier, monospace;
+    letter-spacing: 0.06em;
+    padding: 0.85rem 1rem;
+    text-align: right;
+    white-space: nowrap;
+    border-bottom: 1px solid var(--border);
+  }
+  thead th:first-child { text-align: left; }
+  tbody tr { border-bottom: 1px solid rgba(255,255,255,0.04); transition: background 0.15s; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:nth-child(odd) { background: var(--row-alt); }
+  tbody tr:hover { background: rgba(0,245,255,0.05); }
+  tbody td {
+    padding: 0.75rem 1rem;
+    text-align: right;
+    white-space: nowrap;
+  }
+  tbody td:first-child { text-align: left; font-weight: 600; color: var(--white); }
+
+  /* P&L specific */
+  .row-label { color: var(--muted) !important; font-weight: 400 !important; padding-left: 1.8rem !important; }
+  .row-subtotal td { color: var(--green); font-weight: 700; }
+  .row-margin td:not(:first-child) { color: var(--gold); font-style: italic; }
+  .row-ebitda-pos td { color: var(--green); font-weight: 700; }
+  .row-ebitda-neg td:not(:first-child) { color: var(--red); font-weight: 700; }
+  .row-ebitda-neg td:first-child { color: var(--white); font-weight: 700; }
+  .row-section-head td {
+    background: rgba(124,58,237,0.12);
+    color: var(--purple2) !important;
+    font-weight: 700 !important;
+    font-family: "Courier New", Courier, monospace;
+    letter-spacing: 0.05em;
+    padding-top: 1rem !important;
+  }
+  .row-divider td { border-top: 1px solid var(--border) !important; }
+  .glow-green { text-shadow: 0 0 12px rgba(0,230,118,0.5); }
+  .glow-gold  { text-shadow: 0 0 12px rgba(255,214,0,0.4); }
+  .glow-red   { text-shadow: 0 0 10px rgba(255,77,106,0.5); }
+
+  /* ── BAR CHART ── */
+  .chart-container {
+    padding: 2rem 1.5rem 1.5rem;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+  }
+  .chart-title {
+    font-family: "Courier New", Courier, monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
+  .bars-grid {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: clamp(8px, 3vw, 28px);
+    height: 200px;
+    padding-bottom: 0;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+  }
+  .bar-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    flex: 1;
+    max-width: 120px;
+    height: 100%;
+    justify-content: flex-end;
+    position: relative;
+  }
+  .bar-amount {
+    font-family: "Courier New", Courier, monospace;
+    font-size: clamp(0.6rem, 1.5vw, 0.78rem);
+    font-weight: 700;
+    color: var(--cyan);
+    margin-bottom: 4px;
+    text-align: center;
+    text-shadow: 0 0 8px rgba(0,245,255,0.5);
+    opacity: 0;
+    transition: opacity 0.4s 0.8s;
+  }
+  .bar-col.animated .bar-amount { opacity: 1; }
+  .bar {
+    width: 100%;
+    border-radius: 6px 6px 0 0;
+    transform-origin: bottom;
+    transform: scaleY(0);
+    transition: transform 0.7s cubic-bezier(0.34,1.56,0.64,1);
+    position: relative;
+    overflow: hidden;
+  }
+  .bar::after {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 40%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.15), transparent);
+    border-radius: 6px 6px 0 0;
+  }
+  .bar-col.animated .bar { transform: scaleY(1); }
+  .bar-y1 { background: linear-gradient(180deg, #00f5ff, #0088aa); height: 100%; }
+  .bar-y2 { background: linear-gradient(180deg, #00e676, #007a40); }
+  .bar-y3 { background: linear-gradient(180deg, #ffd600, #aa8c00); }
+  .bar-y4 { background: linear-gradient(180deg, #ff6b35, #aa3000); }
+  .bar-y5 { background: linear-gradient(180deg, #b020f0, #5a0088); }
+  .bar-label {
+    margin-top: 0.5rem;
+    font-family: "Courier New", Courier, monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+    text-align: center;
+  }
+  .bar-label strong { display: block; color: var(--white); font-size: 0.78rem; }
+  .chart-legend {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+    flex-wrap: wrap;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.75rem;
+    color: var(--muted);
+  }
+  .legend-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* ── TAM/SAM/SOM ── */
+  .market-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    align-items: center;
+  }
+  @media (max-width: 680px) { .market-section { grid-template-columns: 1fr; } }
+  .circles-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+    position: relative;
+    min-height: 320px;
+  }
+  .circle {
+    position: absolute;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    text-align: center;
+  }
+  .circle-tam {
+    width: 280px; height: 280px;
+    background: rgba(124,58,237,0.08);
+    border: 2px solid rgba(124,58,237,0.4);
+    box-shadow: 0 0 40px rgba(124,58,237,0.15), inset 0 0 40px rgba(124,58,237,0.05);
+    animation: pulseRing 4s ease-in-out infinite;
+  }
+  .circle-sam {
+    width: 188px; height: 188px;
+    background: rgba(0,245,255,0.06);
+    border: 2px solid rgba(0,245,255,0.35);
+    box-shadow: 0 0 30px rgba(0,245,255,0.12), inset 0 0 30px rgba(0,245,255,0.04);
+    animation: pulseRing 4s 0.8s ease-in-out infinite;
+  }
+  .circle-som {
+    width: 108px; height: 108px;
+    background: rgba(0,230,118,0.1);
+    border: 2px solid rgba(0,230,118,0.5);
+    box-shadow: 0 0 24px rgba(0,230,118,0.25), inset 0 0 20px rgba(0,230,118,0.08);
+    animation: pulseRing 4s 1.6s ease-in-out infinite;
+  }
+  @keyframes pulseRing {
+    0%, 100% { box-shadow: 0 0 40px rgba(124,58,237,0.15), inset 0 0 40px rgba(124,58,237,0.05); }
+    50%       { box-shadow: 0 0 60px rgba(124,58,237,0.28), inset 0 0 40px rgba(124,58,237,0.08); }
+  }
+  .circle-tam-label {
+    position: absolute;
+    top: 14px; left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+  .circle-sam-label {
+    position: absolute;
+    top: 78px; left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+  .circle-som-label {
+    position: absolute;
+    top: 0; left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+  .c-label-inner { position: relative; z-index: 2; }
+  .circle-tam .c-label-inner { margin-top: 12px; }
+  .circle-sam .c-label-inner { margin-top: -50px; }
+  .circle-som .c-label-inner { margin-top: 0; }
+  .c-amount {
+    font-family: "Courier New", Courier, monospace;
+    font-weight: 800;
+    font-size: 0.95rem;
+    line-height: 1.1;
+  }
+  .c-name {
+    font-size: 0.62rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    opacity: 0.8;
+    margin-top: 2px;
+  }
+  .c-desc { font-size: 0.6rem; opacity: 0.6; margin-top: 1px; max-width: 80px; line-height: 1.3; }
+  .tam-c { color: var(--purple2); }
+  .sam-c { color: var(--cyan); }
+  .som-c { color: var(--green); }
+
+  .market-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+  }
+  .stat-row {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem 1.2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    transition: border-color 0.2s;
+  }
+  .stat-row:hover { border-color: rgba(0,245,255,0.3); }
+  .stat-label { font-size: 0.8rem; font-weight: 600; }
+  .stat-desc { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
+  .stat-value {
+    font-family: "Courier New", Courier, monospace;
+    font-size: 1.3rem;
+    font-weight: 800;
+    white-space: nowrap;
+  }
+
+  /* ── COMPARE TABLE ── */
+  .compare-head th { text-align: center !important; }
+  .compare-head th:first-child { text-align: left !important; }
+  .cmp-col-us { background: rgba(0,245,255,0.06) !important; }
+  .cmp-us-head {
+    background: rgba(0,245,255,0.12) !important;
+    color: var(--cyan) !important;
+    position: relative;
+  }
+  .badge-best {
+    display: inline-block;
+    background: var(--cyan);
+    color: #000;
+    font-size: 0.58rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    padding: 1px 6px;
+    border-radius: 20px;
+    margin-left: 6px;
+    vertical-align: middle;
+    text-transform: uppercase;
+  }
+  .cmp-cell { text-align: center !important; font-size: 0.9rem; }
+  .icon-good  { color: var(--green); font-size: 1.1rem; }
+  .icon-mid   { color: var(--gold);  font-size: 1.1rem; }
+  .icon-bad   { color: var(--red);   font-size: 1.1rem; }
+
+  /* ── VALUATION TABLE ── */
+  .val-bear td:not(:first-child) { color: var(--red); }
+  .val-base td:not(:first-child) { color: var(--gold); }
+  .val-bull td:not(:first-child) { color: var(--green); }
+  .val-highlight {
+    font-weight: 800 !important;
+    font-size: 1.05em;
+  }
+  .scenario-tag {
+    display: inline-block;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 20px;
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+  .tag-bear { background: rgba(255,77,106,0.15); color: var(--red); border: 1px solid rgba(255,77,106,0.3); }
+  .tag-base { background: rgba(255,214,0,0.12); color: var(--gold); border: 1px solid rgba(255,214,0,0.3); }
+  .tag-bull { background: rgba(0,230,118,0.12); color: var(--green); border: 1px solid rgba(0,230,118,0.3); }
+
+  /* ── KPI STRIP ── */
+  .kpi-strip {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2.5rem;
+  }
+  .kpi-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.2rem 1.4rem;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .kpi-card::before {
+    content: "";
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 3px;
+    border-radius: 0 0 12px 12px;
+  }
+  .kpi-cyan::before  { background: linear-gradient(90deg, var(--cyan), var(--purple)); }
+  .kpi-green::before { background: linear-gradient(90deg, var(--green), #00897b); }
+  .kpi-gold::before  { background: linear-gradient(90deg, var(--gold), #f57f17); }
+  .kpi-purple::before{ background: linear-gradient(90deg, var(--purple), #e91e8c); }
+  .kpi-card:hover { border-color: rgba(0,245,255,0.3); transform: translateY(-2px); }
+  .kpi-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); margin-bottom: 0.3rem; }
+  .kpi-value {
+    font-family: "Courier New", Courier, monospace;
+    font-size: 1.6rem;
+    font-weight: 800;
+    line-height: 1;
+  }
+  .kpi-sub { font-size: 0.72rem; color: var(--muted); margin-top: 0.3rem; }
+
+  /* ── FOOTER ── */
+  footer {
+    text-align: center;
+    padding: 2.5rem 1rem;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    margin-top: 2rem;
+  }
+  footer span { color: var(--cyan); }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  .fade-in {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  .fade-in.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 600px) {
+    nav { padding: 0 1rem; }
+    nav .nav-badge { display: none; }
+    .section { padding: 2rem 1rem; }
+    .bars-grid { height: 150px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="hub-link" href="index.html">← Hub</a>
+  <span class="nav-title">Pro-Forma — ABC82100</span>
+  <span class="nav-badge">CONFIDENTIAL</span>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+  <p class="hero-eyebrow">Strategic Financial Analysis</p>
+  <h1>Financial Model — ABC82100</h1>
+  <p class="hero-sub">5-Year Projection &nbsp;·&nbsp; GitMonsters &nbsp;·&nbsp; 2026</p>
+  <div class="hero-divider"></div>
+</header>
+
+<!-- KPI STRIP -->
+<div class="section" style="padding-top:1rem; padding-bottom:0;">
+  <div class="kpi-strip fade-in">
+    <div class="kpi-card kpi-cyan">
+      <div class="kpi-label">Year 5 Revenue</div>
+      <div class="kpi-value" style="color:var(--cyan)">$28M</div>
+      <div class="kpi-sub">70× Year 1 growth</div>
+    </div>
+    <div class="kpi-card kpi-green">
+      <div class="kpi-label">Bull Valuation</div>
+      <div class="kpi-value" style="color:var(--green)">$420M</div>
+      <div class="kpi-sub">15× revenue multiple</div>
+    </div>
+    <div class="kpi-card kpi-gold">
+      <div class="kpi-label">Investor Return</div>
+      <div class="kpi-value" style="color:var(--gold)">210×</div>
+      <div class="kpi-sub">vs $2M seed (bull)</div>
+    </div>
+    <div class="kpi-card kpi-purple">
+      <div class="kpi-label">TAM Opportunity</div>
+      <div class="kpi-value" style="color:var(--purple2)">$47B</div>
+      <div class="kpi-sub">AI Reasoning Market</div>
+    </div>
+  </div>
+</div>
+
+<!-- P&L TABLE -->
+<div class="section fade-in">
+  <p class="section-title">Section 01</p>
+  <h2 class="section-heading">5-Year Profit &amp; Loss</h2>
+  <div class="card">
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="text-align:left; min-width:200px">Line Item</th>
+            <th>FY 2026<br><small style="font-weight:400;color:var(--muted)">Year 1</small></th>
+            <th>FY 2027<br><small style="font-weight:400;color:var(--muted)">Year 2</small></th>
+            <th>FY 2028<br><small style="font-weight:400;color:var(--muted)">Year 3</small></th>
+            <th>FY 2029<br><small style="font-weight:400;color:var(--muted)">Year 4</small></th>
+            <th>FY 2030<br><small style="font-weight:400;color:var(--muted)">Year 5</small></th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Revenue -->
+          <tr class="row-divider">
+            <td>Revenue</td>
+            <td>$0.40M</td>
+            <td>$1.80M</td>
+            <td>$5.20M</td>
+            <td>$13.50M</td>
+            <td>$28.00M</td>
+          </tr>
+          <tr>
+            <td class="row-label">— Cost of Goods Sold (30%)</td>
+            <td style="color:var(--red)">($0.12M)</td>
+            <td style="color:var(--red)">($0.54M)</td>
+            <td style="color:var(--red)">($1.56M)</td>
+            <td style="color:var(--red)">($4.05M)</td>
+            <td style="color:var(--red)">($8.40M)</td>
+          </tr>
+          <!-- Gross Profit -->
+          <tr class="row-subtotal row-divider">
+            <td>Gross Profit</td>
+            <td class="glow-green">$0.28M</td>
+            <td class="glow-green">$1.26M</td>
+            <td class="glow-green">$3.64M</td>
+            <td class="glow-green">$9.45M</td>
+            <td class="glow-green">$19.60M</td>
+          </tr>
+          <tr class="row-margin">
+            <td style="color:var(--gold); font-weight:600">Gross Margin %</td>
+            <td class="glow-gold">70%</td>
+            <td class="glow-gold">70%</td>
+            <td class="glow-gold">70%</td>
+            <td class="glow-gold">70%</td>
+            <td class="glow-gold">70%</td>
+          </tr>
+          <!-- OpEx -->
+          <tr class="row-section-head">
+            <td colspan="6">Operating Expenses</td>
+          </tr>
+          <tr>
+            <td class="row-label">— Research &amp; Development</td>
+            <td style="color:var(--red)">($0.12M)</td>
+            <td style="color:var(--red)">($0.43M)</td>
+            <td style="color:var(--red)">($0.94M)</td>
+            <td style="color:var(--red)">($1.89M)</td>
+            <td style="color:var(--red)">($3.36M)</td>
+          </tr>
+          <tr>
+            <td class="row-label">— Sales &amp; Marketing</td>
+            <td style="color:var(--red)">($0.10M)</td>
+            <td style="color:var(--red)">($0.36M)</td>
+            <td style="color:var(--red)">($0.78M)</td>
+            <td style="color:var(--red)">($1.62M)</td>
+            <td style="color:var(--red)">($2.80M)</td>
+          </tr>
+          <tr>
+            <td class="row-label">— General &amp; Administrative</td>
+            <td style="color:var(--red)">($0.12M)</td>
+            <td style="color:var(--red)">($0.36M)</td>
+            <td style="color:var(--red)">($0.52M)</td>
+            <td style="color:var(--red)">($1.08M)</td>
+            <td style="color:var(--red)">($1.96M)</td>
+          </tr>
+          <tr class="row-divider">
+            <td style="font-weight:600">Total OpEx</td>
+            <td style="color:var(--red); font-weight:600">($0.34M)</td>
+            <td style="color:var(--red); font-weight:600">($1.15M)</td>
+            <td style="color:var(--red); font-weight:600">($2.24M)</td>
+            <td style="color:var(--red); font-weight:600">($4.59M)</td>
+            <td style="color:var(--red); font-weight:600">($8.12M)</td>
+          </tr>
+          <tr>
+            <td class="row-label">— OpEx as % of Revenue</td>
+            <td style="color:var(--muted)">85%</td>
+            <td style="color:var(--muted)">64%</td>
+            <td style="color:var(--muted)">43%</td>
+            <td style="color:var(--muted)">34%</td>
+            <td style="color:var(--muted)">29%</td>
+          </tr>
+          <!-- EBITDA -->
+          <tr class="row-ebitda-neg row-divider" id="ebitda-row-1">
+            <td>EBITDA</td>
+            <td class="glow-red">($0.06M)</td>
+            <td class="glow-green" style="color:var(--green)">$0.11M</td>
+            <td class="glow-green" style="color:var(--green)">$1.40M</td>
+            <td class="glow-green" style="color:var(--green)">$4.86M</td>
+            <td class="glow-green" style="color:var(--green)">$11.48M</td>
+          </tr>
+          <tr class="row-margin">
+            <td style="color:var(--gold); font-weight:600">EBITDA Margin %</td>
+            <td class="glow-red" style="color:var(--red)">–15%</td>
+            <td class="glow-gold">6%</td>
+            <td class="glow-gold">27%</td>
+            <td class="glow-gold">36%</td>
+            <td class="glow-gold">41%</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- REVENUE BAR CHART -->
+<div class="section fade-in">
+  <p class="section-title">Section 02</p>
+  <h2 class="section-heading">Revenue Growth Trajectory</h2>
+  <div class="chart-container">
+    <p class="chart-title">Annual Recurring Revenue · FY 2026 – 2030 (USD Millions)</p>
+    <div class="bars-grid" id="barsGrid">
+      <div class="bar-col" style="height:100%">
+        <div class="bar-amount">$0.4M</div>
+        <div class="bar bar-y1" style="height:calc(100% * 0.4/28); transition-delay:0.0s"></div>
+      </div>
+      <div class="bar-col" style="height:100%">
+        <div class="bar-amount">$1.8M</div>
+        <div class="bar bar-y2" style="height:calc(100% * 1.8/28); transition-delay:0.12s"></div>
+      </div>
+      <div class="bar-col" style="height:100%">
+        <div class="bar-amount">$5.2M</div>
+        <div class="bar bar-y3" style="height:calc(100% * 5.2/28); transition-delay:0.24s"></div>
+      </div>
+      <div class="bar-col" style="height:100%">
+        <div class="bar-amount">$13.5M</div>
+        <div class="bar bar-y4" style="height:calc(100% * 13.5/28); transition-delay:0.36s"></div>
+      </div>
+      <div class="bar-col" style="height:100%">
+        <div class="bar-amount">$28M</div>
+        <div class="bar bar-y5" style="height:100%; transition-delay:0.48s"></div>
+      </div>
+    </div>
+    <div style="display:flex; justify-content:center; gap:clamp(8px,3vw,28px); margin-top:0.5rem;">
+      <div style="flex:1;max-width:120px;text-align:center"><div class="bar-label"><strong>FY 2026</strong>Year 1</div></div>
+      <div style="flex:1;max-width:120px;text-align:center"><div class="bar-label"><strong>FY 2027</strong>Year 2</div></div>
+      <div style="flex:1;max-width:120px;text-align:center"><div class="bar-label"><strong>FY 2028</strong>Year 3</div></div>
+      <div style="flex:1;max-width:120px;text-align:center"><div class="bar-label"><strong>FY 2029</strong>Year 4</div></div>
+      <div style="flex:1;max-width:120px;text-align:center"><div class="bar-label"><strong>FY 2030</strong>Year 5</div></div>
+    </div>
+    <div class="chart-legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#00f5ff"></div>2026</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#00e676"></div>2027</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#ffd600"></div>2028</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#ff6b35"></div>2029</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#b020f0"></div>2030</div>
+    </div>
+  </div>
+</div>
+
+<!-- TAM / SAM / SOM -->
+<div class="section fade-in">
+  <p class="section-title">Section 03</p>
+  <h2 class="section-heading">Market Opportunity</h2>
+  <div class="card">
+    <div class="card-inner">
+      <div class="market-section">
+        <!-- CONCENTRIC CIRCLES -->
+        <div class="circles-wrap">
+          <div class="circle circle-tam">
+            <div class="c-label-inner" style="margin-top:-110px;">
+              <div class="c-amount tam-c">$47B</div>
+              <div class="c-name tam-c">TAM</div>
+              <div class="c-desc" style="color:rgba(157,91,240,0.7)">Total AI Reasoning Market</div>
+            </div>
+          </div>
+          <div class="circle circle-sam">
+            <div class="c-label-inner" style="margin-top:-60px;">
+              <div class="c-amount sam-c">$8B</div>
+              <div class="c-name sam-c">SAM</div>
+              <div class="c-desc" style="color:rgba(0,245,255,0.65)">Enterprise AI Segment</div>
+            </div>
+          </div>
+          <div class="circle circle-som">
+            <div class="c-label-inner" style="margin-top:0;">
+              <div class="c-amount som-c" style="font-size:0.8rem">$400M</div>
+              <div class="c-name som-c" style="font-size:0.55rem">SOM</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- STAT ROWS -->
+        <div class="market-stats">
+          <div class="stat-row">
+            <div>
+              <div class="stat-label" style="color:var(--purple2)">TAM — Total Addressable Market</div>
+              <div class="stat-desc">Global AI Reasoning &amp; Inference Infrastructure</div>
+            </div>
+            <div class="stat-value" style="color:var(--purple2)">$47B</div>
+          </div>
+          <div class="stat-row">
+            <div>
+              <div class="stat-label" style="color:var(--cyan)">SAM — Serviceable Addressable Market</div>
+              <div class="stat-desc">Enterprise AI Segment, Eng. Tooling Buyers</div>
+            </div>
+            <div class="stat-value" style="color:var(--cyan)">$8B</div>
+          </div>
+          <div class="stat-row">
+            <div>
+              <div class="stat-label" style="color:var(--green)">SOM — Serviceable Obtainable Market</div>
+              <div class="stat-desc">Year 1 Realistic Capture (5% of SAM)</div>
+            </div>
+            <div class="stat-value" style="color:var(--green)">$400M</div>
+          </div>
+          <div class="stat-row">
+            <div>
+              <div class="stat-label" style="color:var(--gold)">Year 1 Revenue Target</div>
+              <div class="stat-desc">0.1% SOM Penetration — Conservative Entry</div>
+            </div>
+            <div class="stat-value" style="color:var(--gold)">$0.4M</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BUILD vs BUY vs LICENSE -->
+<div class="section fade-in">
+  <p class="section-title">Section 04</p>
+  <h2 class="section-heading">Cost Comparison — Build vs Buy vs License</h2>
+  <div class="card">
+    <div class="tbl-wrap">
+      <table>
+        <thead class="compare-head">
+          <tr>
+            <th style="text-align:left; min-width:180px">Criteria</th>
+            <th>🔨 Build<br><small style="font-weight:400; color:var(--muted)">In-House</small></th>
+            <th>🛒 Buy<br><small style="font-weight:400; color:var(--muted)">Off-Shelf</small></th>
+            <th class="cmp-us-head">⚡ License<br><small style="font-weight:400; color:rgba(0,245,255,0.7)">ABC82100 <span class="badge-best">Best</span></small></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Implementation Time</td>
+            <td class="cmp-cell"><span class="icon-bad">✗</span><br><small style="color:var(--muted)">12–18 months</small></td>
+            <td class="cmp-cell"><span class="icon-mid">~</span><br><small style="color:var(--muted)">3–6 months</small></td>
+            <td class="cmp-cell cmp-col-us"><span class="icon-good">✓</span><br><small style="color:var(--green)">2–4 weeks</small></td>
+          </tr>
+          <tr>
+            <td>Upfront Cost</td>
+            <td class="cmp-cell"><span class="icon-bad">✗</span><br><small style="color:var(--muted)">$500K–$2M</small></td>
+            <td class="cmp-cell"><span class="icon-mid">~</span><br><small style="color:var(--muted)">$100K–$400K</small></td>
+            <td class="cmp-cell cmp-col-us"><span class="icon-good">✓</span><br><small style="color:var(--green)">$15K–$60K</small></td>
+          </tr>
+          <tr>
+            <td>Annual Maintenance</td>
+            <td class="cmp-cell"><span class="icon-bad">✗</span><br><small style="color:var(--muted)">2–4 FTE engineers</small></td>
+            <td class="cmp-cell"><span class="icon-mid">~</span><br><small style="color:var(--muted)">Vendor lock-in</small></td>
+            <td class="cmp-cell cmp-col-us"><span class="icon-good">✓</span><br><small style="color:var(--green)">Included in license</small></td>
+          </tr>
+          <tr>
+            <td>Customization</td>
+            <td class="cmp-cell"><span class="icon-good">✓</span><br><small style="color:var(--green)">Full control</small></td>
+            <td class="cmp-cell"><span class="icon-bad">✗</span><br><small style="color:var(--muted)">Minimal / none</small></td>
+            <td class="cmp-cell cmp-col-us"><span class="icon-good">✓</span><br><small style="color:var(--green)">API + config layer</small></td>
+          </tr>
+          <tr>
+            <td>Ongoing Support</td>
+            <td class="cmp-cell"><span class="icon-bad">✗</span><br><small style="color:var(--muted)">Self-managed</small></td>
+            <td class="cmp-cell"><span class="icon-mid">~</span><br><small style="color:var(--muted)">Tier-2 SLAs</small></td>
+            <td class="cmp-cell cmp-col-us"><span class="icon-good">✓</span><br><small style="color:var(--green)">Dedicated SRE team</small></td>
+          </tr>
+          <tr>
+            <td>Time-to-Value</td>
+            <td class="cmp-cell"><span class="icon-bad">✗</span><br><small style="color:var(--muted)">1+ year</small></td>
+            <td class="cmp-cell"><span class="icon-mid">~</span><br><small style="color:var(--muted)">Months</small></td>
+            <td class="cmp-cell cmp-col-us"><span class="icon-good">✓</span><br><small style="color:var(--green)">Days</small></td>
+          </tr>
+          <tr style="background:rgba(0,245,255,0.04);">
+            <td style="font-weight:700; color:var(--white)">Est. 3-Year TCO</td>
+            <td class="cmp-cell" style="color:var(--red); font-weight:700">$3.2M+</td>
+            <td class="cmp-cell" style="color:var(--gold); font-weight:700">$800K</td>
+            <td class="cmp-cell cmp-col-us" style="color:var(--green); font-weight:700; text-shadow:0 0 12px rgba(0,230,118,0.4)">$120K</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- VALUATION SCENARIOS -->
+<div class="section fade-in">
+  <p class="section-title">Section 05</p>
+  <h2 class="section-heading">Valuation Scenarios</h2>
+  <p style="color:var(--muted); font-size:0.85rem; margin-bottom:1.5rem; margin-top:-1rem;">Based on $2M seed investment · Year 5 exit · Revenue multiple applied to FY 2030</p>
+  <div class="card">
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="text-align:left; min-width:200px">Metric</th>
+            <th style="color:var(--red)">🐻 Bear<br><small style="font-weight:400; color:var(--muted)">Conservative</small></th>
+            <th style="color:var(--gold)">📊 Base<br><small style="font-weight:400; color:var(--muted)">Expected</small></th>
+            <th style="color:var(--green)">🚀 Bull<br><small style="font-weight:400; color:var(--muted)">Optimistic</small></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Revenue Multiple</td>
+            <td class="val-bear">3× ARR</td>
+            <td class="val-base">8× ARR</td>
+            <td class="val-bull">15× ARR</td>
+          </tr>
+          <tr>
+            <td>Year 5 Revenue (FY 2030)</td>
+            <td class="val-bear">$28.0M</td>
+            <td class="val-base">$28.0M</td>
+            <td class="val-bull">$28.0M</td>
+          </tr>
+          <tr class="row-divider">
+            <td style="font-weight:700">Implied Valuation</td>
+            <td class="val-bear val-highlight glow-red">$84M</td>
+            <td class="val-base val-highlight glow-gold">$224M</td>
+            <td class="val-bull val-highlight glow-green">$420M</td>
+          </tr>
+          <tr>
+            <td>Seed Investment</td>
+            <td class="val-bear">$2.0M</td>
+            <td class="val-base">$2.0M</td>
+            <td class="val-bull">$2.0M</td>
+          </tr>
+          <tr class="row-divider">
+            <td style="font-weight:700">Investor Return (MOIC)</td>
+            <td class="val-bear val-highlight" style="font-size:1.2em !important; text-shadow:0 0 10px rgba(255,77,106,0.5)">42×<br><small class="scenario-tag tag-bear">Bear</small></td>
+            <td class="val-base val-highlight" style="font-size:1.2em !important; text-shadow:0 0 10px rgba(255,214,0,0.4)">112×<br><small class="scenario-tag tag-base">Base</small></td>
+            <td class="val-bull val-highlight" style="font-size:1.2em !important; text-shadow:0 0 12px rgba(0,230,118,0.5)">210×<br><small class="scenario-tag tag-bull">Bull</small></td>
+          </tr>
+          <tr>
+            <td>IRR (est. 5-year)</td>
+            <td class="val-bear">~108%</td>
+            <td class="val-base">~148%</td>
+            <td class="val-bull">~189%</td>
+          </tr>
+          <tr>
+            <td>Exit Strategy</td>
+            <td class="val-bear" style="font-size:0.82rem">Strategic M&amp;A</td>
+            <td class="val-base" style="font-size:0.82rem">Series B / PE Exit</td>
+            <td class="val-bull" style="font-size:0.82rem">IPO / Strategic</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Disclaimer -->
+  <p style="color:var(--muted); font-size:0.7rem; margin-top:1rem; line-height:1.7; opacity:0.7;">
+    ⚠ Forward-looking statements are projections only and do not constitute a guarantee of future performance. 
+    All figures are estimates based on current market conditions and management assumptions. 
+    Past performance is not indicative of future results. Consult qualified financial advisors before making investment decisions.
+  </p>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <p>© 2026 <span>ABC82100 · GitMonsters</span> — Pro-Forma Financial Model · All projections are forward-looking estimates</p>
+  <p style="margin-top:0.4rem; opacity:0.5;">CONFIDENTIAL &amp; PROPRIETARY — For authorized recipients only</p>
+</footer>
+
+<script>
+  /* ── Intersection Observer: fade-in sections ── */
+  const fadeEls = document.querySelectorAll('.fade-in');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.08 });
+  fadeEls.forEach(el => observer.observe(el));
+
+  /* ── Bar chart animation ── */
+  const barsGrid = document.getElementById('barsGrid');
+  const barObserver = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.querySelectorAll('.bar-col').forEach(col => col.classList.add('animated'));
+        barObserver.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.2 });
+  barObserver.observe(barsGrid);
+
+  /* ── Highlight EBITDA row cells individually ── */
+  (function() {
+    const ebitdaRow = document.getElementById('ebitda-row-1');
+    if (!ebitdaRow) return;
+    const cells = ebitdaRow.querySelectorAll('td');
+    cells.forEach((cell, i) => {
+      if (i === 1) {
+        cell.style.color = 'var(--red)';
+        cell.style.fontWeight = '700';
+      } else if (i > 1) {
+        cell.style.color = 'var(--green)';
+        cell.style.fontWeight = '700';
+      }
+    });
+  })();
+</script>
+</body>
+</html>
