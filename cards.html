@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Product &amp; Social Cards — ABC82100</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0a0e1a;
+      --bg2:       #0d1120;
+      --cyan:      #00f5ff;
+      --purple:    #7c3aed;
+      --white:     #ffffff;
+      --muted:     #8899aa;
+      --card-gap:  1.5rem;
+
+      /* Twitter/X palette */
+      --tw-bg:     #15202b;
+      --tw-border: #253341;
+      --tw-blue:   #1d9bf0;
+      --tw-muted:  #8b98a5;
+      --tw-hover:  #1e2732;
+
+      /* LinkedIn palette */
+      --li-bg:     #1b1f23;
+      --li-border: #313437;
+      --li-blue:   #70b5f9;
+      --li-muted:  #a8a8a8;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--white);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* ── NAV ─────────────────────────────────────────────── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.9rem 2rem;
+      background: rgba(10,14,26,.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(0,245,255,.15);
+    }
+
+    nav a.hub-link {
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      color: var(--cyan);
+      text-decoration: none;
+      font-size: .9rem;
+      font-weight: 600;
+      letter-spacing: .02em;
+      padding: .35rem .75rem;
+      border: 1px solid rgba(0,245,255,.3);
+      border-radius: 6px;
+      transition: background .2s, border-color .2s;
+      white-space: nowrap;
+    }
+    nav a.hub-link:hover { background: rgba(0,245,255,.08); border-color: var(--cyan); }
+
+    nav .page-title {
+      font-family: "Courier New", Courier, monospace;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: .12em;
+      color: var(--white);
+      text-transform: uppercase;
+    }
+    nav .page-title span { color: var(--cyan); }
+
+    /* ── LAYOUT ──────────────────────────────────────────── */
+    main {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem 6rem;
+    }
+
+    .section-heading {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      margin-bottom: 2rem;
+    }
+    .section-heading h2 {
+      font-family: "Courier New", Courier, monospace;
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--white);
+    }
+    .section-heading .pill {
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .08em;
+      padding: .2rem .6rem;
+      border-radius: 20px;
+      text-transform: uppercase;
+    }
+    .pill-x       { background: rgba(29,155,240,.2);  color: #1d9bf0; border: 1px solid rgba(29,155,240,.4); }
+    .pill-ig      { background: rgba(124,58,237,.2);  color: #c084fc; border: 1px solid rgba(124,58,237,.4); }
+    .pill-li      { background: rgba(112,181,249,.2); color: #70b5f9; border: 1px solid rgba(112,181,249,.4); }
+
+    .section-line {
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, rgba(0,245,255,.25) 0%, transparent 100%);
+    }
+
+    section { margin-bottom: 4.5rem; }
+
+    /* ── TWEET CARDS ─────────────────────────────────────── */
+    .tweet-thread {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid var(--tw-border);
+    }
+
+    .tweet-card {
+      background: var(--tw-bg);
+      padding: 1rem 1.25rem;
+      transition: background .18s;
+      cursor: pointer;
+      position: relative;
+    }
+    .tweet-card:not(:last-child) { border-bottom: 1px solid var(--tw-border); }
+    .tweet-card:hover { background: var(--tw-hover); }
+
+    /* thread line */
+    .tweet-card:not(:last-child) .avatar-col::after {
+      content: '';
+      position: absolute;
+      left: calc(1.25rem + 19px);
+      top: calc(1rem + 40px);
+      width: 2px;
+      bottom: -1px;
+      background: var(--tw-border);
+    }
+
+    .tweet-inner {
+      display: flex;
+      gap: .75rem;
+      align-items: flex-start;
+    }
+
+    .avatar-col {
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .tweet-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--purple) 0%, #1d9bf0 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: .75rem;
+      font-weight: 800;
+      letter-spacing: .03em;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .tweet-body { flex: 1; min-width: 0; }
+
+    .tweet-meta {
+      display: flex;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: .25rem .5rem;
+      margin-bottom: .35rem;
+    }
+    .tweet-name {
+      font-size: .93rem;
+      font-weight: 700;
+      color: var(--white);
+    }
+    .tweet-handle, .tweet-ts {
+      font-size: .88rem;
+      color: var(--tw-muted);
+    }
+    .tweet-ts::before { content: '·'; margin-right: .25rem; }
+
+    .tweet-text {
+      font-size: .95rem;
+      color: #e7e9ea;
+      line-height: 1.55;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .tweet-text a { color: var(--tw-blue); text-decoration: none; }
+    .tweet-text a:hover { text-decoration: underline; }
+
+    .tweet-actions {
+      display: flex;
+      gap: 1.25rem;
+      margin-top: .85rem;
+    }
+    .tw-action {
+      display: inline-flex;
+      align-items: center;
+      gap: .35rem;
+      font-size: .83rem;
+      color: var(--tw-muted);
+      cursor: pointer;
+      border: none;
+      background: none;
+      padding: 0;
+      transition: color .15s;
+    }
+    .tw-action:hover.reply   { color: var(--tw-blue); }
+    .tw-action:hover.retweet { color: #00ba7c; }
+    .tw-action:hover.like    { color: #f91880; }
+    .tw-action:hover.views   { color: var(--tw-blue); }
+
+    .tw-icon { width: 18px; height: 18px; display: block; fill: currentColor; }
+
+    /* ── INSTAGRAM STORIES ───────────────────────────────── */
+    .stories-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+    }
+
+    .story-card {
+      border-radius: 16px;
+      overflow: hidden;
+      position: relative;
+      aspect-ratio: 9/16;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 1.25rem 1rem;
+      cursor: pointer;
+      transition: transform .25s, box-shadow .25s;
+    }
+    .story-card:hover {
+      transform: scale(1.025);
+      box-shadow: 0 12px 40px rgba(0,0,0,.55);
+    }
+
+    /* story gradients */
+    .story-1 { background: linear-gradient(165deg, #3b0764 0%, #7c3aed 45%, #a855f7 75%, #c084fc 100%); }
+    .story-2 { background: linear-gradient(165deg, #0a1628 0%, #0d3b5e 40%, #0891b2 75%, #00f5ff 100%); }
+    .story-3 {
+      background: #050812;
+      box-shadow: inset 0 0 80px rgba(0,245,255,.08), inset 0 0 30px rgba(124,58,237,.15);
+    }
+
+    /* story 3 glow overlay */
+    .story-3::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 70% 40% at 50% 30%, rgba(0,245,255,.18) 0%, transparent 70%),
+        radial-gradient(ellipse 50% 50% at 50% 70%, rgba(124,58,237,.22) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .story-top-bar {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      padding: .75rem .75rem .4rem;
+    }
+    .story-progress {
+      display: flex;
+      gap: 3px;
+    }
+    .story-seg {
+      flex: 1;
+      height: 2.5px;
+      border-radius: 2px;
+      background: rgba(255,255,255,.35);
+    }
+    .story-seg.active { background: rgba(255,255,255,.9); }
+
+    .story-ig-avatar {
+      position: absolute;
+      top: 1.1rem; left: .75rem;
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      border: 2px solid var(--white);
+      background: linear-gradient(135deg, var(--purple), #ff6b6b, #fbbf24);
+      display: flex; align-items: center; justify-content: center;
+      font-size: .55rem; font-weight: 800; color: #fff;
+    }
+    .story-user {
+      position: absolute;
+      top: 1.25rem; left: 3.2rem;
+      font-size: .72rem; font-weight: 600; color: rgba(255,255,255,.9);
+      letter-spacing: .02em;
+    }
+
+    .story-content { position: relative; z-index: 1; }
+
+    .story-label {
+      font-size: .65rem;
+      font-weight: 700;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.7);
+      margin-bottom: .25rem;
+    }
+    .story-big {
+      font-family: "Courier New", Courier, monospace;
+      font-size: clamp(1.8rem, 5vw, 2.6rem);
+      font-weight: 900;
+      line-height: 1.05;
+      color: #fff;
+      text-shadow: 0 2px 20px rgba(0,0,0,.5);
+      letter-spacing: -.01em;
+    }
+    .story-sub {
+      font-size: .78rem;
+      font-weight: 500;
+      color: rgba(255,255,255,.85);
+      margin-top: .3rem;
+      line-height: 1.3;
+    }
+    .story-footer {
+      font-size: .62rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.55);
+      margin-top: .6rem;
+    }
+
+    /* story 3 specific */
+    .story-glow-big {
+      font-family: "Courier New", Courier, monospace;
+      font-size: clamp(2rem, 6vw, 3rem);
+      font-weight: 900;
+      color: var(--cyan);
+      text-shadow: 0 0 20px rgba(0,245,255,.8), 0 0 40px rgba(0,245,255,.4);
+      line-height: 1;
+      letter-spacing: .05em;
+    }
+    .story-glow-sub {
+      font-size: .78rem;
+      font-weight: 600;
+      color: rgba(255,255,255,.8);
+      margin-top: .3rem;
+    }
+    .story-glow-tags {
+      font-size: .58rem;
+      font-weight: 700;
+      letter-spacing: .12em;
+      color: rgba(0,245,255,.65);
+      text-transform: uppercase;
+      margin-top: .5rem;
+      line-height: 1.6;
+    }
+
+    /* ── LINKEDIN CARD ───────────────────────────────────── */
+    .linkedin-card {
+      background: var(--li-bg);
+      border: 1px solid var(--li-border);
+      border-radius: 12px;
+      overflow: hidden;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .li-header {
+      display: flex;
+      align-items: flex-start;
+      gap: .75rem;
+      padding: 1.25rem 1.25rem .75rem;
+    }
+
+    .li-avatar {
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--purple) 0%, #1d9bf0 100%);
+      display: flex; align-items: center; justify-content: center;
+      font-size: .85rem; font-weight: 800; color: #fff;
+      flex-shrink: 0;
+    }
+
+    .li-meta { flex: 1; }
+    .li-name {
+      font-size: .95rem;
+      font-weight: 700;
+      color: var(--white);
+      line-height: 1.2;
+    }
+    .li-title {
+      font-size: .82rem;
+      color: var(--li-muted);
+      margin-top: .1rem;
+    }
+    .li-ts {
+      font-size: .78rem;
+      color: var(--li-muted);
+      margin-top: .15rem;
+      display: flex;
+      align-items: center;
+      gap: .3rem;
+    }
+    .li-globe { font-size: .72rem; }
+
+    .li-follow-btn {
+      margin-left: auto;
+      padding: .4rem .9rem;
+      border-radius: 20px;
+      border: 1px solid var(--li-blue);
+      background: transparent;
+      color: var(--li-blue);
+      font-size: .82rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background .18s;
+      align-self: center;
+    }
+    .li-follow-btn:hover { background: rgba(112,181,249,.1); }
+
+    .li-body {
+      padding: 0 1.25rem 1rem;
+    }
+    .li-text {
+      font-size: .92rem;
+      color: #cfd3d8;
+      line-height: 1.65;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .li-text strong { color: var(--white); }
+    .li-see-more {
+      display: inline;
+      color: var(--li-muted);
+      font-size: .88rem;
+      cursor: pointer;
+    }
+    .li-see-more:hover { text-decoration: underline; }
+
+    .li-hashtags {
+      margin-top: .6rem;
+      font-size: .88rem;
+      color: var(--li-blue);
+      line-height: 1.7;
+    }
+
+    .li-reactions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: .5rem 1.25rem;
+      border-top: 1px solid var(--li-border);
+      font-size: .82rem;
+      color: var(--li-muted);
+    }
+    .li-reaction-icons { display: flex; gap: -4px; }
+    .li-react-icon {
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: .7rem;
+      margin-right: -2px;
+      border: 1.5px solid var(--li-bg);
+    }
+    .ri-like  { background: #3f51b5; }
+    .ri-clap  { background: #388e3c; }
+    .ri-insightful { background: #f57c00; }
+
+    .li-actions {
+      display: flex;
+      border-top: 1px solid var(--li-border);
+    }
+    .li-action-btn {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: .4rem;
+      padding: .75rem .5rem;
+      background: none;
+      border: none;
+      color: var(--li-muted);
+      font-size: .82rem;
+      font-weight: 600;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: background .18s, color .18s;
+    }
+    .li-action-btn:hover { background: rgba(255,255,255,.06); color: var(--white); }
+    .li-btn-icon { font-size: 1rem; }
+
+    /* ── RESPONSIVE ──────────────────────────────────────── */
+    @media (max-width: 640px) {
+      nav { padding: .75rem 1rem; }
+      nav .page-title { font-size: .78rem; }
+      main { padding: 2rem 1rem 4rem; }
+
+      .stories-grid {
+        grid-template-columns: 1fr;
+        max-width: 260px;
+        margin: 0 auto;
+      }
+
+      .tweet-actions { gap: .8rem; }
+      .tw-action span { display: none; }
+
+      .li-follow-btn { display: none; }
+    }
+
+    @media (max-width: 480px) {
+      .section-heading h2 { font-size: .95rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════ NAV ══════════════════════════════════ -->
+<nav>
+  <a href="index.html" class="hub-link">← Hub</a>
+  <span class="page-title">PRODUCT CARDS — <span>ABC82100</span></span>
+</nav>
+
+<main>
+
+  <!-- ══════════════════════ TWITTER/X SECTION ══════════════════════════ -->
+  <section id="twitter">
+    <div class="section-heading">
+      <h2>Twitter / X Tweet Thread</h2>
+      <span class="pill pill-x">𝕏 Dark Mode</span>
+      <span class="section-line"></span>
+    </div>
+
+    <div class="tweet-thread" role="list">
+
+      <!-- Tweet 1 -->
+      <article class="tweet-card" role="listitem">
+        <div class="tweet-inner">
+          <div class="avatar-col">
+            <div class="tweet-avatar">GM</div>
+          </div>
+          <div class="tweet-body">
+            <div class="tweet-meta">
+              <span class="tweet-name">GitMonsters</span>
+              <span class="tweet-handle">@GitMonsters</span>
+              <span class="tweet-ts">2h</span>
+            </div>
+            <div class="tweet-text">🧠 Thread: We just solved ARC-AGI task ABC82100. Here's how we did it (1/5) 🧵</div>
+            <div class="tweet-actions">
+              <button class="tw-action reply" title="Reply">
+                <svg class="tw-icon" viewBox="0 0 24 24"><path d="M1.751 10c0-4.42 3.584-8 8.005-8h4.366c4.49 0 7.498 3.858 6.629 8.138l-.95 4.547a2.25 2.25 0 0 1-2.201 1.806H6.757l-3.957 3.985A.25.25 0 0 1 2.394 20C2.117 20 1.75 19.796 1.75 19.5V10Z"/></svg>
+                <span>24</span>
+              </button>
+              <button class="tw-action retweet" title="Retweet">
+                <svg class="tw-icon" viewBox="0 0 24 24"><path d="M4.5 3.88l4.432 4.14-1.364 1.46L5.5 7.55V16c0 1.1.896 2 2 2H13v2H7.5a4 4 0 0 1-4-4V7.55L1.432 9.48.068 8.02 4.5 3.88zM16.5 6H11V4h5.5a4 4 0 0 1 4 4v8.45l2.068-1.93 1.364 1.46L19.5 20.12l-4.432-4.14 1.364-1.46 2.068 1.93V8c0-1.1-.896-2-2-2z"/></svg>
+                <span>189</span>
+              </button>
+              <button class="tw-action like" title="Like">
+                <svg class="tw-icon" viewBox="0 0 24 24"><path d="M16.697 5.5c-1.222-.06-2.679.51-3.89 2.16l-.805 1.09-.806-1.09C9.984 6.01 8.526 5.44 7.304 5.5c-1.243.07-2.349.78-2.91 1.91-.552 1.12-.633 2.78.479 4.82 1.074 1.97 3.257 4.27 7.129 6.61 3.87-2.34 6.052-4.64 7.126-6.61 1.111-2.04 1.03-3.7.477-4.82-.561-1.13-1.666-1.84-2.908-1.91zm4.187 7.69c-1.351 2.48-4.001 5.12-8.379 7.67l-.503.3-.504-.3c-4.379-2.55-7.029-5.19-8.382-7.67-1.36-2.5-1.41-4.86-.514-6.67.887-1.79 2.647-2.91 4.601-3.01 1.651-.09 3.368.56 4.798 2.01 1.429-1.45 3.146-2.1 4.796-2.01 1.954.1 3.714 1.22 4.601 3.01.896 1.81.846 4.17-.514 6.67z"/></svg>
+                <span>1.2K</span>
+              </button>
+              <button class="tw-action views" title="Views">
+                <svg class="tw-icon" viewBox="0 0 24 24"><path d="M8.75 21V3h2v18h-2zM18 21V8.5h2V21h-2zM4 21l.004-10h2L6 21H4zm9.248 0v-7h2v7h-2z"/></svg>
+                <span>48.7K</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- Tweet 2 -->
+      <article class="tweet-card" role="listitem">
+        <div class="tweet-inner">
+          <div class="avatar-col">
+            <div class="tweet-avatar">GM</div>
+          </div>
+          <div class="tweet-body">
+            <div class="tweet-meta">
+              <span class="tweet-name">GitMonsters</span>
+              <span class="tweet-handle">@GitMonsters</span>
+              <span class="tweet-ts">2h</span>
+            </div>
+            <div class="tweet-text">The key was our 8-limb compound-loop architecture. Each limb handles a different aspect of reasoning. Together they form a complete intelligence cycle. (2/5)</div>
+            <div class="tweet-actions">
+              <button class="tw-action reply"><svg class="tw-icon" viewBox="0 0 24 24"><path d="M1.751 10c0-4.42 3.584-8 8.005-8h4.366c4.49 0 7.498 3.858 6.629 8.138l-.95 4.547a2.25 2.25 0 0 1-2.201 1.806H6.757l-3.957 3.985A.25.25 0 0 1 2.394 20C2.117 20 1.75 19.796 1.75 19.5V10Z"/></svg><span>18</span></button>
+              <button class="tw-action retweet"><svg class="tw-icon" viewBox="0 0 24 24"><path d="M4.5 3.88l4.432 4.14-1.364 1.46L5.5 7.55V16c0 1.1.896 2 2 2H13v2H7.5a4 4 0 0 1-4-4V7.55L1.432 9.48.068 8.02 4.5 3.88zM16.5 6H11V4h5.5a4 4 0 0 1 4 4v8.45l2.068-1.93 1.364 1.46L19.5 20.12l-4.432-4.14 1.364-1.46 2.068 1.93V8c0-1.1-.896-2-2-2z"/></svg><span>142</span></button>
+              <button class="tw-action like"><svg class="tw-icon" viewBox="0 0 24 24"><path d="M16.697 5.5c-1.222-.06-2.679.51-3.89 2.16l-.805 1.09-.806-1.09C9.984 6.01 8.526 5.44 7.304 5.5c-1.243.07-2.349.78-2.91 1.91-.552 1.12-.633 2.78.479 4.82 1.074 1.97 3.257 4.27 7.129 6.61 3.87-2.34 6.052-4.64 7.126-6.61 1.111-2.04 1.03-3.7.477-4.82-.561-1.13-1.666-1.84-2.908-1.91zm4.187 7.69c-1.351 2.48-4.001 5.12-8.379 7.67l-.503.3-.504-.3c-4.379-2.55-7.029-5.19-8.382-7.67-1.36-2.5-1.41-4.86-.514-6.67.887-1.79 2.647-2.91 4.601-3.01 1.651-.09 3.368.56 4.798 2.01 1.429-1.45 3.146-2.1 4.796-2.01 1.954.1 3.714 1.22 4.601 3.01.896 1.81.846 4.17-.514 6.67z"/></svg><span>987</span></button>
+              <button class="tw-action views"><svg class="tw-icon" viewBox="0 0 24 24"><path d="M8.75 21V3h2v18h-2zM18 21V8.5h2V21h-2zM4 21l.004-10h2L6 21H4zm9.248 0v-7h2v7h-2z"/></svg><span>31.4K</span></button>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- Tweet 3 -->
+      <article class="tweet-card" role="listitem">
+        <div class="tweet-inner">
+          <div class="avatar-col">
+            <div class="tweet-avatar">GM</div>
+          </div>
+          <div class="tweet-body">
+            <div class="tweet-meta">
+              <span class="tweet-name">GitMonsters</span>
+              <span class="tweet-handle">@GitMonsters</span>
+              <span class="tweet-ts">2h</span>
+            </div>
+            <div class="tweet-text">At the core: a 64-expert Mixture-of-Experts grid. 8×8 specialists, each trained on specific pattern classes. Dynamic routing finds the right experts for each problem. (3/5)</div>
+            <div class="tweet-actions">
+              <button class="tw-action reply"><svg class="tw-icon" viewBox="0 0 24 24"><path d="M1.751 10c0-4.42 3.584-8 8.005-8h4.366c4.49 0 7.498 3.858 6.629 8.138l-.95 4.547a2.25 2.25 0 0 1-2.201 1.806H6.757l-3.957 3.985A.25.25 0 0 1 2.394 20C2.117 20 1.75 19.796 1.75 19.5V10Z"/></svg><span>31</span></button>
+              <button class="tw-action retweet"><svg class="tw-icon" viewBox="0 0 24 24"><path d="M4.5 3.88l4.432 4.14-1.364 1.46L5.5 7.55V16c0 1.1.896 2 2 2H13v2H7.5a4 4 0 0 1-4-4V7.55L1.432 9.48.068 8.02 4.5 3.88zM16.5 6H11V4h5.5a4 4 0 0 1 4 4v8.45l2.068-1.93 1.364 1.46L19.5 20.12l-4.432-4.14 1.364-1.46 2.068 1.93V8c0-1.1-.896-2-2-2z"/></svg><span>208</span></button>
+              <button class="tw-action like"><svg class="tw-icon" viewBox="0 0 24 24"><path d="M16.697 5.5c-1.222-.06-2.679.51-3.89 2.16l-.805 1.09-.806-1.09C9.984 6.01 8.526 5.44 7.304 5.5c-1.243.07-2.349.78-2.91 1.91-.552 1.12-.633 2.78.479 4.82 1.074 1.97 3.257 4.27 7.129 6.61 3.87-2.34 6.052-4.64 7.126-6.61 1.111-2.04 1.03-3.7.477-4.82-.561-1.13-1.666-1.84-2.908-1.91zm4.187 7.69c-1.351 2.48-4.001 5.12-8.379 7.67l-.503.3-.504-.3c-4.379-2.55-7.029-5.19-8.382-7.67-1.36-2.5-1.41-4.86-.514-6.67.887-1.79 2.647-2.91 4.601-3.01 1.651-.09 3.368.56 4.798 2.01 1.429-1.45 3.146-2.1 4.796-2.01 1.954.1 3.714 1.22 4.601 3.01.896 1.81.846 4.17-.514 6.67z"/></svg><span>1.5K</span></button>
+              <button class="tw-action views"><svg class="tw-icon" viewBox="0 0 24 24"><path d="M8.75 21V3h2v18h-2zM18 21V8.5h2V21h-2zM4 21l.004-10h2L6 21H4zm9.248 0v-7h2v7h-2z"/></svg><span>39.1K</span></button>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- Tweet 4 -->
+      <article class="tweet-card" role="listitem">
+        <div class="tweet-inner">
+          <div class="avatar-col">
+            <div class="tweet-avatar">GM</div>
+          </div>
+          <div class="tweet-body">
+            <div class="tweet-meta">
+              <span class="tweet-name">GitMonsters</span>
+              <span class="tweet-handle">@GitMonsters</span>
+              <span class="tweet-ts">2h</span>
+            </div>
+            <div class="tweet-text">We built a full 6-page interactive demo system. Tests, pitch deck, financial model, architecture diagram — all live. (4/5) → <a href="index.html">link to repo</a></div>
+            <div class="tweet-actions">
+              <button class="tw-action reply"><svg class="tw-icon" viewBox="0 0 24 24"><path d="M1.751 10c0-4.42 3.584-8 8.005-8h4.366c4.49 0 7.498 3.858 6.629 8.138l-.95 4.547a2.25 2.25 0 0 1-2.201 1.806H6.757l-3.957 3.985A.25.25 0 0 1 2.394 20C2.117 20 1.75 19.796 1.75 19.5V10Z"/></svg><span>55</span></button>
+              <button class="tw-action retweet"><svg class="tw-icon" viewBox="0 0 24 24"><path d="M4.5 3.88l4.432 4.14-1.364 1.46L5.5 7.55V16c0 1.1.896 2 2 2H13v2H7.5a4 4 0 0 1-4-4V7.55L1.432 9.48.068 8.02 4.5 3.88zM16.5 6H11V4h5.5a4 4 0 0 1 4 4v8.45l2.068-1.93 1.364 1.46L19.5 20.12l-4.432-4.14 1.364-1.46 2.068 1.93V8c0-1.1-.896-2-2-2z"/></svg><span>341</span></button>
+              <button class="tw-action like"><svg class="tw-icon" viewBox="0 0 24 24"><path d="M16.697 5.5c-1.222-.06-2.679.51-3.89 2.16l-.805 1.09-.806-1.09C9.984 6.01 8.526 5.44 7.304 5.5c-1.243.07-2.349.78-2.91 1.91-.552 1.12-.633 2.78.479 4.82 1.074 1.97 3.257 4.27 7.129 6.61 3.87-2.34 6.052-4.64 7.126-6.61 1.111-2.04 1.03-3.7.477-4.82-.561-1.13-1.666-1.84-2.908-1.91zm4.187 7.69c-1.351 2.48-4.001 5.12-8.379 7.67l-.503.3-.504-.3c-4.379-2.55-7.029-5.19-8.382-7.67-1.36-2.5-1.41-4.86-.514-6.67.887-1.79 2.647-2.91 4.601-3.01 1.651-.09 3.368.56 4.798 2.01 1.429-1.45 3.146-2.1 4.796-2.01 1.954.1 3.714 1.22 4.601 3.01.896 1.81.846 4.17-.514 6.67z"/></svg><span>2.1K</span></button>
+              <button class="tw-action views"><svg class="tw-icon" viewBox="0 0 24 24"><path d="M8.75 21V3h2v18h-2zM18 21V8.5h2V21h-2zM4 21l.004-10h2L6 21H4zm9.248 0v-7h2v7h-2z"/></svg><span>52.8K</span></button>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- Tweet 5 -->
+      <article class="tweet-card" role="listitem">
+        <div class="tweet-inner">
+          <div class="avatar-col">
+            <div class="tweet-avatar">GM</div>
+          </div>
+          <div class="tweet-body">
+            <div class="tweet-meta">
+              <span class="tweet-name">GitMonsters</span>
+              <span class="tweet-handle">@GitMonsters</span>
+              <span class="tweet-ts">2h</span>
+            </div>
+            <div class="tweet-text">ARC-AGI solved. But this is just the beginning. The 8-limb system generalizes to any reasoning task. Watch this space. 🚀 (5/5)</div>
+            <div class="tweet-actions">
+              <button class="tw-action reply"><svg class="tw-icon" viewBox="0 0 24 24"><path d="M1.751 10c0-4.42 3.584-8 8.005-8h4.366c4.49 0 7.498 3.858 6.629 8.138l-.95 4.547a2.25 2.25 0 0 1-2.201 1.806H6.757l-3.957 3.985A.25.25 0 0 1 2.394 20C2.117 20 1.75 19.796 1.75 19.5V10Z"/></svg><span>112</span></button>
+              <button class="tw-action retweet"><svg class="tw-icon" viewBox="0 0 24 24"><path d="M4.5 3.88l4.432 4.14-1.364 1.46L5.5 7.55V16c0 1.1.896 2 2 2H13v2H7.5a4 4 0 0 1-4-4V7.55L1.432 9.48.068 8.02 4.5 3.88zM16.5 6H11V4h5.5a4 4 0 0 1 4 4v8.45l2.068-1.93 1.364 1.46L19.5 20.12l-4.432-4.14 1.364-1.46 2.068 1.93V8c0-1.1-.896-2-2-2z"/></svg><span>876</span></button>
+              <button class="tw-action like"><svg class="tw-icon" viewBox="0 0 24 24"><path d="M16.697 5.5c-1.222-.06-2.679.51-3.89 2.16l-.805 1.09-.806-1.09C9.984 6.01 8.526 5.44 7.304 5.5c-1.243.07-2.349.78-2.91 1.91-.552 1.12-.633 2.78.479 4.82 1.074 1.97 3.257 4.27 7.129 6.61 3.87-2.34 6.052-4.64 7.126-6.61 1.111-2.04 1.03-3.7.477-4.82-.561-1.13-1.666-1.84-2.908-1.91zm4.187 7.69c-1.351 2.48-4.001 5.12-8.379 7.67l-.503.3-.504-.3c-4.379-2.55-7.029-5.19-8.382-7.67-1.36-2.5-1.41-4.86-.514-6.67.887-1.79 2.647-2.91 4.601-3.01 1.651-.09 3.368.56 4.798 2.01 1.429-1.45 3.146-2.1 4.796-2.01 1.954.1 3.714 1.22 4.601 3.01.896 1.81.846 4.17-.514 6.67z"/></svg><span>4.7K</span></button>
+              <button class="tw-action views"><svg class="tw-icon" viewBox="0 0 24 24"><path d="M8.75 21V3h2v18h-2zM18 21V8.5h2V21h-2zM4 21l.004-10h2L6 21H4zm9.248 0v-7h2v7h-2z"/></svg><span>101K</span></button>
+            </div>
+          </div>
+        </div>
+      </article>
+
+    </div><!-- /tweet-thread -->
+  </section>
+
+  <!-- ══════════════════════ INSTAGRAM STORIES ════════════════════════════ -->
+  <section id="instagram">
+    <div class="section-heading">
+      <h2>Instagram Stories</h2>
+      <span class="pill pill-ig">IG Stories</span>
+      <span class="section-line"></span>
+    </div>
+
+    <div class="stories-grid">
+
+      <!-- Story 1: Purple gradient -->
+      <div class="story-card story-1" role="img" aria-label="Instagram Story: SOLVED">
+        <div class="story-top-bar">
+          <div class="story-progress">
+            <div class="story-seg active"></div>
+            <div class="story-seg"></div>
+            <div class="story-seg"></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:.5rem;margin-top:.5rem;">
+            <div class="story-ig-avatar">GM</div>
+            <span class="story-user">gitmonsters</span>
+          </div>
+        </div>
+
+        <div class="story-content">
+          <div class="story-label">Achievement unlocked</div>
+          <div class="story-big">🧠<br>SOLVED</div>
+          <div class="story-sub">ARC-AGI Task<br>ABC82100</div>
+          <div class="story-footer">GitMonsters 2026</div>
+        </div>
+      </div>
+
+      <!-- Story 2: Cyan-to-blue gradient -->
+      <div class="story-card story-2" role="img" aria-label="Instagram Story: 64 Experts">
+        <div class="story-top-bar">
+          <div class="story-progress">
+            <div class="story-seg active"></div>
+            <div class="story-seg active"></div>
+            <div class="story-seg"></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:.5rem;margin-top:.5rem;">
+            <div class="story-ig-avatar">GM</div>
+            <span class="story-user">gitmonsters</span>
+          </div>
+        </div>
+
+        <div class="story-content">
+          <div class="story-label">Under the hood</div>
+          <div class="story-big" style="font-size:clamp(2.5rem,7vw,3.5rem);color:#00f5ff;text-shadow:0 0 30px rgba(0,245,255,.6);">64<br>EXPERTS</div>
+          <div class="story-sub">Mixture of Experts Grid</div>
+          <div class="story-footer">8×8 Specialists</div>
+        </div>
+      </div>
+
+      <!-- Story 3: Dark glowing -->
+      <div class="story-card story-3" role="img" aria-label="Instagram Story: 8 Limbs">
+        <div class="story-top-bar">
+          <div class="story-progress">
+            <div class="story-seg active"></div>
+            <div class="story-seg active"></div>
+            <div class="story-seg active"></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:.5rem;margin-top:.5rem;">
+            <div class="story-ig-avatar">GM</div>
+            <span class="story-user">gitmonsters</span>
+          </div>
+        </div>
+
+        <div class="story-content">
+          <div class="story-label" style="color:rgba(0,245,255,.7);">Architecture</div>
+          <div class="story-glow-big">8<br>LIMBS</div>
+          <div class="story-glow-sub">Compound Intelligence Loop</div>
+          <div class="story-glow-tags">PERCEPTION<br>REASONING<br>MEMORY</div>
+        </div>
+      </div>
+
+    </div><!-- /stories-grid -->
+  </section>
+
+  <!-- ══════════════════════ LINKEDIN SECTION ═════════════════════════════ -->
+  <section id="linkedin">
+    <div class="section-heading">
+      <h2>LinkedIn Post</h2>
+      <span class="pill pill-li">LinkedIn</span>
+      <span class="section-line"></span>
+    </div>
+
+    <div class="linkedin-card">
+      <div class="li-header">
+        <div class="li-avatar">GM</div>
+        <div class="li-meta">
+          <div class="li-name">GitMonsters</div>
+          <div class="li-title">AI Research Team · Pushing the Boundaries of Machine Reasoning</div>
+          <div class="li-ts">
+            <span>2h</span>
+            <span class="li-globe">🌐</span>
+          </div>
+        </div>
+        <button class="li-follow-btn">+ Follow</button>
+      </div>
+
+      <div class="li-body">
+        <div class="li-text">🎯 <strong>We just solved ARC-AGI task ABC82100.</strong> Here's what that means and how we got there.
+
+The Abstraction and Reasoning Corpus (ARC-AGI) is considered one of the hardest benchmarks in AI — designed to test genuine fluid intelligence, not pattern memorization. Task ABC82100 had stumped automated systems for months.
+
+Today, our team cracked it. 💡
+
+<strong>The Architecture That Made It Possible:</strong>
+
+🔷 <strong>8-Limb Compound Loop</strong> — Eight specialized reasoning modules working in concert, each handling a distinct cognitive function: Perception, Pattern Recognition, Spatial Reasoning, Temporal Modeling, Analogy Formation, Hypothesis Testing, Memory Consolidation, and Output Synthesis.
+
+🔷 <strong>64-Expert MoE Grid</strong> — An 8×8 Mixture-of-Experts system with dynamic routing. The right specialists activate for every sub-problem, keeping computation focused and efficient.
+
+🔷 <strong>Full Interactive Demo</strong> — We built a 6-page live system including test harnesses, a pitch deck, a financial model, and an architecture diagram — all open and accessible.
+
+The result: a perfect score on ABC82100, with a reasoning trace that's fully interpretable.
+
+This isn't just a benchmark win. The 8-limb architecture generalizes. We're already applying it to novel domains.
+
+<strong>What's next?</strong> Full ARC-AGI benchmark suite. We're just getting started.</div>
+        <div class="li-hashtags">#ArcAGI &nbsp;#ArtificialIntelligence &nbsp;#MachineLearning &nbsp;#MixtureOfExperts &nbsp;#AGI &nbsp;#GitMonsters</div>
+      </div>
+
+      <div class="li-reactions">
+        <div style="display:flex;align-items:center;gap:.5rem;">
+          <span>
+            <span class="li-react-icon ri-like">👍</span><span class="li-react-icon ri-clap">👏</span><span class="li-react-icon ri-insightful">💡</span>
+          </span>
+          <span>847 reactions</span>
+        </div>
+        <span>143 comments · 58 reposts</span>
+      </div>
+
+      <div class="li-actions">
+        <button class="li-action-btn">
+          <span class="li-btn-icon">👍</span>
+          <span>Like</span>
+        </button>
+        <button class="li-action-btn">
+          <span class="li-btn-icon">💬</span>
+          <span>Comment</span>
+        </button>
+        <button class="li-action-btn">
+          <span class="li-btn-icon">🔁</span>
+          <span>Repost</span>
+        </button>
+        <button class="li-action-btn">
+          <span class="li-btn-icon">📤</span>
+          <span>Send</span>
+        </button>
+      </div>
+    </div>
+
+  </section>
+
+</main>
+
+<script>
+  /* Micro-interaction: tweet like toggling */
+  document.querySelectorAll('.tw-action.like').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const active = btn.dataset.liked === '1';
+      const span = btn.querySelector('span');
+      const svg = btn.querySelector('svg path');
+      const count = parseInt(span.textContent.replace(/[^\d]/g, ''), 10) || 0;
+
+      if (!active) {
+        btn.dataset.liked = '1';
+        btn.style.color = '#f91880';
+        svg.style.fill = '#f91880';
+        span.textContent = formatCount(count + 1);
+      } else {
+        btn.dataset.liked = '0';
+        btn.style.color = '';
+        svg.style.fill = '';
+        span.textContent = formatCount(count - 1);
+      }
+    });
+  });
+
+  /* Micro-interaction: retweet toggling */
+  document.querySelectorAll('.tw-action.retweet').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const active = btn.dataset.rt === '1';
+      const span = btn.querySelector('span');
+      const count = parseInt(span.textContent.replace(/[^\d]/g, ''), 10) || 0;
+
+      if (!active) {
+        btn.dataset.rt = '1';
+        btn.style.color = '#00ba7c';
+        span.textContent = formatCount(count + 1);
+      } else {
+        btn.dataset.rt = '0';
+        btn.style.color = '';
+        span.textContent = formatCount(count - 1);
+      }
+    });
+  });
+
+  /* LinkedIn reaction button */
+  document.querySelectorAll('.li-action-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      btn.style.color = btn.style.color === 'rgb(112, 181, 249)' ? '' : '#70b5f9';
+    });
+  });
+
+  function formatCount(n) {
+    if (n >= 1000000) return (n / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+    if (n >= 1000) return (n / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
+    return n.toString();
+  }
+</script>
+
+</body>
+</html>

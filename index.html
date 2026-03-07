@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HUB — ABC82100</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #0a0e1a;
+    --bg2:       #0d1224;
+    --bg3:       #111827;
+    --cyan:      #00f5ff;
+    --purple:    #7c3aed;
+    --purple2:   #9d5bf4;
+    --white:     #ffffff;
+    --muted:     #94a3b8;
+    --card-bg:   rgba(13,18,36,0.85);
+    --border:    rgba(0,245,255,0.15);
+    --glow-c:    rgba(0,245,255,0.35);
+    --glow-p:    rgba(124,58,237,0.35);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--white);
+    font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* ── Canvas background ── */
+  #bg-canvas {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.45;
+  }
+
+  /* ── Grid overlay ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    background-image:
+      linear-gradient(rgba(0,245,255,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,245,255,0.04) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none;
+    animation: gridPulse 8s ease-in-out infinite;
+  }
+
+  @keyframes gridPulse {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.55; }
+  }
+
+  /* ── Scanline ── */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.06) 2px,
+      rgba(0,0,0,0.06) 4px
+    );
+    pointer-events: none;
+  }
+
+  /* ── Layout wrapper ── */
+  .wrapper {
+    position: relative;
+    z-index: 1;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  /* ────────────────────────────────────
+     NAV
+  ──────────────────────────────────── */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(10,14,26,0.88);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    height: 60px;
+  }
+
+  .nav-logo {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    color: var(--cyan);
+    text-shadow: 0 0 12px var(--cyan);
+    text-decoration: none;
+  }
+
+  .nav-dot {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.78rem;
+    color: var(--muted);
+    font-family: 'Courier New', Courier, monospace;
+    letter-spacing: 0.1em;
+  }
+
+  .pulse-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #22c55e;
+    box-shadow: 0 0 8px #22c55e;
+    animation: blink 1.6s ease-in-out infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.3; }
+  }
+
+  /* ────────────────────────────────────
+     HERO
+  ──────────────────────────────────── */
+  .hero {
+    padding: 80px 0 50px;
+    text-align: center;
+  }
+
+  .hero-eyebrow {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0.35em;
+    color: var(--purple2);
+    text-transform: uppercase;
+    margin-bottom: 24px;
+    opacity: 0;
+    animation: fadeUp 0.7s 0.2s ease forwards;
+  }
+
+  .hero-title {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: clamp(2.2rem, 7vw, 5rem);
+    font-weight: 900;
+    letter-spacing: 0.06em;
+    line-height: 1.05;
+    background: linear-gradient(135deg, var(--cyan) 0%, var(--purple2) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 24px rgba(0,245,255,0.5));
+    opacity: 0;
+    animation: fadeUp 0.7s 0.35s ease forwards, glowPulse 3s 1s ease-in-out infinite;
+  }
+
+  @keyframes glowPulse {
+    0%, 100% { filter: drop-shadow(0 0 24px rgba(0,245,255,0.5)); }
+    50%       { filter: drop-shadow(0 0 48px rgba(0,245,255,0.9)) drop-shadow(0 0 80px rgba(124,58,237,0.4)); }
+  }
+
+  .hero-subtitle {
+    margin-top: 18px;
+    font-size: 1rem;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    opacity: 0;
+    animation: fadeUp 0.7s 0.5s ease forwards;
+  }
+
+  .hero-subtitle span {
+    color: var(--cyan);
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(22px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ────────────────────────────────────
+     STAT RIBBON
+  ──────────────────────────────────── */
+  .stat-ribbon {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin: 48px 0;
+  }
+
+  .stat-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px 16px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    opacity: 0;
+    animation: fadeUp 0.6s ease forwards;
+    backdrop-filter: blur(8px);
+  }
+
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--cyan), var(--purple));
+  }
+
+  .stat-card:nth-child(1) { animation-delay: 0.6s; }
+  .stat-card:nth-child(2) { animation-delay: 0.75s; }
+  .stat-card:nth-child(3) { animation-delay: 0.9s; }
+  .stat-card:nth-child(4) { animation-delay: 1.05s; }
+
+  .stat-number {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 2.6rem;
+    font-weight: 900;
+    color: var(--cyan);
+    text-shadow: 0 0 16px var(--cyan);
+    line-height: 1;
+  }
+
+  .stat-label {
+    margin-top: 8px;
+    font-size: 0.78rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* ────────────────────────────────────
+     SECTION TITLE
+  ──────────────────────────────────── */
+  .section-title {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: var(--cyan);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--border), transparent);
+  }
+
+  /* ────────────────────────────────────
+     PAGE NAVIGATION GRID
+  ──────────────────────────────────── */
+  .page-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-bottom: 60px;
+  }
+
+  .page-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 28px 24px;
+    text-decoration: none;
+    color: var(--white);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    backdrop-filter: blur(8px);
+    opacity: 0;
+    animation: fadeUp 0.6s ease forwards;
+  }
+
+  .page-card:nth-child(1) { animation-delay: 0.9s; }
+  .page-card:nth-child(2) { animation-delay: 1.0s; }
+  .page-card:nth-child(3) { animation-delay: 1.1s; }
+  .page-card:nth-child(4) { animation-delay: 1.2s; }
+  .page-card:nth-child(5) { animation-delay: 1.3s; }
+  .page-card:nth-child(6) { animation-delay: 1.4s; }
+
+  .page-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at top left, rgba(0,245,255,0.08), transparent 60%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .page-card::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .page-card:hover {
+    transform: translateY(-6px);
+    border-color: rgba(0,245,255,0.5);
+    box-shadow:
+      0 0 0 1px rgba(0,245,255,0.2),
+      0 8px 32px rgba(0,245,255,0.15),
+      0 20px 60px rgba(0,0,0,0.5);
+  }
+
+  .page-card:hover::before,
+  .page-card:hover::after { opacity: 1; }
+
+  .card-icon {
+    font-size: 2rem;
+    line-height: 1;
+  }
+
+  .card-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--white);
+  }
+
+  .card-slug {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.72rem;
+    color: var(--cyan);
+    opacity: 0.8;
+    letter-spacing: 0.1em;
+  }
+
+  .card-desc {
+    font-size: 0.83rem;
+    color: var(--muted);
+    line-height: 1.5;
+    margin-top: 4px;
+  }
+
+  .card-arrow {
+    margin-top: auto;
+    padding-top: 14px;
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    color: var(--cyan);
+    opacity: 0;
+    transform: translateX(-6px);
+    transition: opacity 0.25s, transform 0.25s;
+    font-family: 'Courier New', Courier, monospace;
+  }
+
+  .page-card:hover .card-arrow {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  /* ────────────────────────────────────
+     SYSTEM HEALTH
+  ──────────────────────────────────── */
+  .health-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-bottom: 60px;
+  }
+
+  .health-item {
+    background: var(--card-bg);
+    border: 1px solid rgba(34,197,94,0.2);
+    border-radius: 10px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    backdrop-filter: blur(8px);
+    opacity: 0;
+    animation: fadeUp 0.5s ease forwards;
+  }
+
+  .health-item:nth-child(1) { animation-delay: 1.4s; }
+  .health-item:nth-child(2) { animation-delay: 1.5s; }
+  .health-item:nth-child(3) { animation-delay: 1.6s; }
+  .health-item:nth-child(4) { animation-delay: 1.7s; }
+  .health-item:nth-child(5) { animation-delay: 1.8s; }
+  .health-item:nth-child(6) { animation-delay: 1.9s; }
+
+  .health-name {
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--white);
+  }
+
+  .health-name span { font-size: 1.1rem; }
+
+  .health-badge {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    color: #22c55e;
+    background: rgba(34,197,94,0.12);
+    border: 1px solid rgba(34,197,94,0.35);
+    border-radius: 4px;
+    padding: 3px 10px;
+    text-shadow: 0 0 8px #22c55e;
+    box-shadow: 0 0 12px rgba(34,197,94,0.2);
+    animation: healthGlow 2.5s ease-in-out infinite;
+  }
+
+  @keyframes healthGlow {
+    0%, 100% { box-shadow: 0 0 12px rgba(34,197,94,0.2); }
+    50%       { box-shadow: 0 0 20px rgba(34,197,94,0.45), 0 0 40px rgba(34,197,94,0.15); }
+  }
+
+  /* ────────────────────────────────────
+     FOOTER
+  ──────────────────────────────────── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 30px 0;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+  }
+
+  .footer-cmd {
+    display: inline-block;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.85rem;
+    background: rgba(0,245,255,0.06);
+    border: 1px solid rgba(0,245,255,0.2);
+    border-radius: 8px;
+    padding: 10px 22px;
+    color: var(--cyan);
+    letter-spacing: 0.06em;
+    margin-bottom: 14px;
+    user-select: all;
+  }
+
+  .footer-cmd .prompt { color: var(--purple2); }
+  .footer-cmd .arrow  { color: var(--muted); }
+
+  .footer-meta {
+    font-size: 0.73rem;
+    color: var(--muted);
+    letter-spacing: 0.12em;
+  }
+
+  /* ────────────────────────────────────
+     RESPONSIVE
+  ──────────────────────────────────── */
+  @media (max-width: 900px) {
+    .page-grid  { grid-template-columns: repeat(2, 1fr); }
+    .health-grid { grid-template-columns: repeat(2, 1fr); }
+    .stat-ribbon { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  @media (max-width: 560px) {
+    .page-grid   { grid-template-columns: 1fr; }
+    .health-grid { grid-template-columns: 1fr; }
+    .stat-ribbon { grid-template-columns: repeat(2, 1fr); }
+    .hero { padding: 50px 0 30px; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="bg-canvas"></canvas>
+
+<!-- ── NAV ── -->
+<nav>
+  <div class="nav-inner">
+    <a class="nav-logo" href="index.html">HUB — ABC82100</a>
+    <div class="nav-dot">
+      <div class="pulse-dot"></div>
+      SYSTEM ONLINE
+    </div>
+  </div>
+</nav>
+
+<!-- ── HERO ── -->
+<section class="hero wrapper">
+  <p class="hero-eyebrow">▸ Command Center &amp; System Overview</p>
+  <h1 class="hero-title">SOLVED — ABC82100</h1>
+  <p class="hero-subtitle">
+    <span>ARC-Prize.org</span> Task &nbsp;·&nbsp; Interactive Demo System
+  </p>
+</section>
+
+<!-- ── STAT RIBBON ── -->
+<div class="wrapper">
+  <div class="stat-ribbon">
+    <div class="stat-card">
+      <div class="stat-number" data-target="6">0</div>
+      <div class="stat-label">Pages</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number" data-target="8">0</div>
+      <div class="stat-label">Tests</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number" data-target="10">0</div>
+      <div class="stat-label">Slides</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number" data-target="64">0</div>
+      <div class="stat-label">Experts</div>
+    </div>
+  </div>
+
+  <!-- ── PAGE GRID ── -->
+  <p class="section-title">// Page Navigation</p>
+  <div class="page-grid">
+
+    <a class="page-card" href="index.html">
+      <div class="card-icon">🏠</div>
+      <div class="card-title">Hub</div>
+      <div class="card-slug">index.html</div>
+      <div class="card-desc">Command center &amp; system overview</div>
+      <div class="card-arrow">OPEN MODULE →</div>
+    </a>
+
+    <a class="page-card" href="tests.html">
+      <div class="card-icon">🧪</div>
+      <div class="card-title">Tests</div>
+      <div class="card-slug">tests.html</div>
+      <div class="card-desc">8 live tests with pass/fail status</div>
+      <div class="card-arrow">OPEN MODULE →</div>
+    </a>
+
+    <a class="page-card" href="pitch.html">
+      <div class="card-icon">📊</div>
+      <div class="card-title">Pitch Deck</div>
+      <div class="card-slug">pitch.html</div>
+      <div class="card-desc">10-slide investor presentation</div>
+      <div class="card-arrow">OPEN MODULE →</div>
+    </a>
+
+    <a class="page-card" href="cards.html">
+      <div class="card-icon">🃏</div>
+      <div class="card-title">Product Cards</div>
+      <div class="card-slug">cards.html</div>
+      <div class="card-desc">Social media card gallery</div>
+      <div class="card-arrow">OPEN MODULE →</div>
+    </a>
+
+    <a class="page-card" href="proforma.html">
+      <div class="card-icon">💰</div>
+      <div class="card-title">Pro-Forma</div>
+      <div class="card-slug">proforma.html</div>
+      <div class="card-desc">5-year financial model</div>
+      <div class="card-arrow">OPEN MODULE →</div>
+    </a>
+
+    <a class="page-card" href="architecture.html">
+      <div class="card-icon">🏗️</div>
+      <div class="card-title">Architecture</div>
+      <div class="card-slug">architecture.html</div>
+      <div class="card-desc">Interactive system diagram</div>
+      <div class="card-arrow">OPEN MODULE →</div>
+    </a>
+
+  </div>
+
+  <!-- ── SYSTEM HEALTH ── -->
+  <p class="section-title">// System Health</p>
+  <div class="health-grid">
+    <div class="health-item">
+      <div class="health-name"><span>🏠</span> Hub</div>
+      <div class="health-badge">ONLINE</div>
+    </div>
+    <div class="health-item">
+      <div class="health-name"><span>🧪</span> Tests</div>
+      <div class="health-badge">ONLINE</div>
+    </div>
+    <div class="health-item">
+      <div class="health-name"><span>📊</span> Pitch Deck</div>
+      <div class="health-badge">ONLINE</div>
+    </div>
+    <div class="health-item">
+      <div class="health-name"><span>🃏</span> Product Cards</div>
+      <div class="health-badge">ONLINE</div>
+    </div>
+    <div class="health-item">
+      <div class="health-name"><span>💰</span> Pro-Forma</div>
+      <div class="health-badge">ONLINE</div>
+    </div>
+    <div class="health-item">
+      <div class="health-name"><span>🏗️</span> Architecture</div>
+      <div class="health-badge">ONLINE</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <div class="footer-cmd">
+    <span class="prompt">$</span>
+    python3 -m http.server 8888
+    <span class="arrow"> →</span>
+    http://localhost:8888
+  </div>
+  <div class="footer-meta">SOLVED — ABC82100 &nbsp;·&nbsp; ARC-Prize.org &nbsp;·&nbsp; Interactive Demo System</div>
+</footer>
+
+<script>
+/* ── Particle canvas ── */
+(function () {
+  const canvas = document.getElementById('bg-canvas');
+  const ctx    = canvas.getContext('2d');
+  let W, H, particles = [], animId;
+
+  function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+
+  function Particle() {
+    this.reset();
+  }
+
+  Particle.prototype.reset = function () {
+    this.x  = Math.random() * W;
+    this.y  = Math.random() * H;
+    this.r  = Math.random() * 1.4 + 0.4;
+    this.vx = (Math.random() - 0.5) * 0.3;
+    this.vy = (Math.random() - 0.5) * 0.3;
+    this.life  = Math.random();
+    this.dlife = (Math.random() * 0.003 + 0.001) * (Math.random() > 0.5 ? 1 : -1);
+    this.hue   = Math.random() > 0.55 ? '0,245,255' : '124,58,237';
+  };
+
+  function init() {
+    particles = [];
+    // Particle density: 1 particle per 14000px² keeps performance smooth on any screen;
+    // cap at 90 to avoid overloading low-end devices
+    const AREA_PER_PARTICLE = 14000;
+    const MAX_PARTICLES = 90;
+    const count = Math.min(Math.floor(W * H / AREA_PER_PARTICLE), MAX_PARTICLES);
+    for (let i = 0; i < count; i++) particles.push(new Particle());
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+
+    particles.forEach(function (p) {
+      p.x += p.vx;
+      p.y += p.vy;
+      p.life += p.dlife;
+
+      if (p.life <= 0 || p.life >= 1) p.dlife *= -1;
+      if (p.x < -10 || p.x > W + 10 || p.y < -10 || p.y > H + 10) p.reset();
+
+      const alpha = p.life * 0.7 + 0.1;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(' + p.hue + ',' + alpha + ')';
+      ctx.fill();
+    });
+
+    /* Draw connecting lines for nearby particles */
+    for (let i = 0; i < particles.length; i++) {
+      for (let j = i + 1; j < particles.length; j++) {
+        const dx   = particles[i].x - particles[j].x;
+        const dy   = particles[i].y - particles[j].y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 120) {
+          const alpha = (1 - dist / 120) * 0.12;
+          ctx.beginPath();
+          ctx.moveTo(particles[i].x, particles[i].y);
+          ctx.lineTo(particles[j].x, particles[j].y);
+          ctx.strokeStyle = 'rgba(0,245,255,' + alpha + ')';
+          ctx.lineWidth = 0.6;
+          ctx.stroke();
+        }
+      }
+    }
+
+    animId = requestAnimationFrame(draw);
+  }
+
+  window.addEventListener('resize', function () { resize(); init(); });
+  resize();
+  init();
+  draw();
+})();
+
+/* ── Animated counters ── */
+(function () {
+  const els = document.querySelectorAll('.stat-number[data-target]');
+  const duration = 1600;
+
+  function easeOut(t) { return 1 - Math.pow(1 - t, 3); }
+
+  function animateCounter(el) {
+    const target = parseInt(el.getAttribute('data-target'), 10);
+    const start  = performance.now();
+
+    function step(now) {
+      const elapsed = now - start;
+      const progress = Math.min(elapsed / duration, 1);
+      el.textContent = Math.round(easeOut(progress) * target);
+      if (progress < 1) requestAnimationFrame(step);
+      else el.textContent = target;
+    }
+
+    requestAnimationFrame(step);
+  }
+
+  /* Trigger on intersection */
+  const observer = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (entry.isIntersecting) {
+        animateCounter(entry.target);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.3 });
+
+  els.forEach(function (el) { observer.observe(el); });
+})();
+</script>
+</body>
+</html>

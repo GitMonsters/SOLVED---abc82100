@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pitch Deck — ABC82100 | GitMonsters</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0e1a;
+    --bg2: #0d1226;
+    --bg3: #111827;
+    --cyan: #00f5ff;
+    --purple: #7c3aed;
+    --purple-light: #a855f7;
+    --white: #ffffff;
+    --muted: #94a3b8;
+    --card: rgba(255,255,255,0.04);
+    --border: rgba(0,245,255,0.15);
+    --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --font-mono: "Courier New", Courier, "Lucida Console", monospace;
+  }
+
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    color: var(--white);
+    font-family: var(--font-sans);
+    overflow: hidden;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 52px;
+    background: rgba(10,14,26,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    z-index: 100;
+  }
+  nav a.hub-link {
+    color: var(--cyan);
+    text-decoration: none;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border: 1px solid rgba(0,245,255,0.25);
+    border-radius: 6px;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  nav a.hub-link:hover { background: rgba(0,245,255,0.08); border-color: var(--cyan); }
+  nav .nav-title {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+  nav .slide-counter {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--cyan);
+    min-width: 80px;
+    text-align: right;
+  }
+
+  /* ── STAGE ── */
+  .stage {
+    position: fixed;
+    top: 52px; bottom: 40px; left: 0; right: 0;
+    overflow: hidden;
+  }
+
+  /* ── SLIDES ── */
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 60px;
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity 0.45s ease, transform 0.45s ease;
+    pointer-events: none;
+    text-align: center;
+  }
+  .slide.active {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+  .slide.exit {
+    opacity: 0;
+    transform: translateY(-18px);
+    pointer-events: none;
+  }
+
+  /* ── SLIDE CONTENT HELPERS ── */
+  .slide-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--cyan);
+    margin-bottom: 18px;
+    opacity: 0.7;
+  }
+  .slide h1 {
+    font-size: clamp(32px, 6vw, 72px);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -1px;
+    margin-bottom: 16px;
+  }
+  .slide h2 {
+    font-size: clamp(22px, 4vw, 44px);
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 20px;
+  }
+  .slide p {
+    font-size: clamp(14px, 1.8vw, 18px);
+    line-height: 1.7;
+    color: var(--muted);
+    max-width: 720px;
+  }
+  .grad-text {
+    background: linear-gradient(135deg, var(--cyan) 0%, var(--purple-light) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .cyan { color: var(--cyan); }
+  .purple { color: var(--purple-light); }
+  .white { color: var(--white); }
+
+  /* Grid / card helpers */
+  .card-grid {
+    display: grid;
+    gap: 16px;
+    width: 100%;
+    max-width: 860px;
+    margin-top: 28px;
+  }
+  .card-grid.cols-2 { grid-template-columns: 1fr 1fr; }
+  .card-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 22px;
+    text-align: left;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .card:hover { border-color: rgba(0,245,255,0.4); background: rgba(0,245,255,0.04); }
+  .card .card-icon { font-size: 22px; margin-bottom: 10px; }
+  .card .card-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--cyan);
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+  }
+  .card .card-body { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+  /* Bullet list */
+  .bullet-list {
+    list-style: none;
+    text-align: left;
+    max-width: 640px;
+    margin-top: 24px;
+    width: 100%;
+  }
+  .bullet-list li {
+    font-size: clamp(13px, 1.5vw, 16px);
+    color: var(--muted);
+    padding: 10px 0 10px 28px;
+    position: relative;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    line-height: 1.55;
+  }
+  .bullet-list li::before {
+    content: "▶";
+    position: absolute;
+    left: 0;
+    color: var(--cyan);
+    font-size: 9px;
+    top: 13px;
+  }
+  .bullet-list li strong { color: var(--white); }
+
+  /* Big stat */
+  .stat-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .stat-block .stat-num {
+    font-size: clamp(36px, 6vw, 68px);
+    font-weight: 800;
+    line-height: 1;
+    font-family: var(--font-mono);
+  }
+  .stat-block .stat-label {
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 6px;
+  }
+
+  /* Tag badge */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(0,245,255,0.1);
+    border: 1px solid rgba(0,245,255,0.3);
+    color: var(--cyan);
+    border-radius: 999px;
+    padding: 5px 14px;
+    font-size: 12px;
+    font-family: var(--font-mono);
+    letter-spacing: 0.5px;
+    margin: 4px;
+  }
+  .badge.purple-badge {
+    background: rgba(124,58,237,0.15);
+    border-color: rgba(168,85,247,0.35);
+    color: var(--purple-light);
+  }
+
+  /* Divider line */
+  .hdivider {
+    width: 80px; height: 3px;
+    background: linear-gradient(90deg, var(--cyan), var(--purple));
+    border-radius: 2px;
+    margin: 0 auto 24px;
+  }
+
+  /* ── SLIDE 1 – COVER ── */
+  #slide-1 {
+    background:
+      radial-gradient(ellipse 70% 60% at 50% 50%, rgba(124,58,237,0.18) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 40% at 80% 20%, rgba(0,245,255,0.10) 0%, transparent 60%),
+      var(--bg);
+  }
+  .cover-glyph {
+    font-size: clamp(80px, 14vw, 160px);
+    line-height: 1;
+    margin-bottom: 20px;
+    filter: drop-shadow(0 0 40px rgba(0,245,255,0.4));
+    animation: pulse-glyph 3s ease-in-out infinite;
+  }
+  @keyframes pulse-glyph {
+    0%,100% { filter: drop-shadow(0 0 30px rgba(0,245,255,0.3)); }
+    50%      { filter: drop-shadow(0 0 60px rgba(0,245,255,0.6)); }
+  }
+  .cover-year {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    letter-spacing: 4px;
+    color: var(--muted);
+    margin-top: 20px;
+  }
+  .cover-badges { margin-top: 20px; }
+
+  /* ── SLIDE 3 – SOLUTION 8 LIMBS ── */
+  .limbs-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    max-width: 860px;
+    width: 100%;
+    margin-top: 22px;
+  }
+  .limb-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 12px;
+    text-align: center;
+    font-size: 12px;
+    transition: border-color 0.2s;
+  }
+  .limb-card:hover { border-color: var(--purple-light); }
+  .limb-card .limb-icon { font-size: 20px; margin-bottom: 6px; }
+  .limb-card .limb-name { font-weight: 700; color: var(--white); font-size: 12px; }
+  .limb-card .limb-desc { color: var(--muted); font-size: 11px; margin-top: 4px; line-height: 1.4; }
+
+  /* ── SLIDE 4 – TECH ── */
+  .tech-diagram {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    margin-top: 24px;
+    width: 100%;
+    max-width: 640px;
+  }
+  .tech-layer {
+    width: 100%;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    text-align: left;
+    position: relative;
+    transition: border-color 0.2s;
+  }
+  .tech-layer:hover { border-color: rgba(0,245,255,0.4); }
+  .tech-layer .layer-icon { font-size: 20px; flex-shrink: 0; }
+  .tech-layer .layer-title { font-size: 14px; font-weight: 700; color: var(--white); }
+  .tech-layer .layer-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .tech-connector {
+    width: 2px; height: 16px;
+    background: linear-gradient(180deg, var(--cyan), var(--purple));
+    flex-shrink: 0;
+  }
+
+  /* ── SLIDE 6 – MARKET ── */
+  .market-funnel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    margin-top: 24px;
+    width: 100%;
+    max-width: 560px;
+  }
+  .funnel-row {
+    width: 100%;
+    border-radius: 8px;
+    padding: 18px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+    position: relative;
+    overflow: hidden;
+  }
+  .funnel-row::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    opacity: 0.07;
+  }
+  .funnel-tam { background: rgba(0,245,255,0.12); border: 1px solid rgba(0,245,255,0.3); }
+  .funnel-sam { background: rgba(124,58,237,0.12); border: 1px solid rgba(124,58,237,0.3); width: 85%; }
+  .funnel-som { background: rgba(168,85,247,0.12); border: 1px solid rgba(168,85,247,0.3); width: 65%; }
+  .funnel-label { font-size: 13px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
+  .funnel-desc  { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .funnel-val   { font-family: var(--font-mono); font-size: 22px; font-weight: 800; white-space: nowrap; }
+  .funnel-left  { text-align: left; }
+
+  /* ── SLIDE 7 – BIZ MODEL ── */
+  .revenue-bars { width: 100%; max-width: 600px; margin-top: 24px; }
+  .rev-item { margin-bottom: 18px; text-align: left; }
+  .rev-header { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 13px; }
+  .rev-name { color: var(--white); font-weight: 600; }
+  .rev-pct  { color: var(--cyan); font-family: var(--font-mono); }
+  .rev-bar-bg { height: 8px; background: rgba(255,255,255,0.06); border-radius: 4px; overflow: hidden; }
+  .rev-bar-fill { height: 100%; border-radius: 4px; transition: width 0.8s ease; }
+
+  /* ── SLIDE 8 – TRACTION ── */
+  .traction-list {
+    list-style: none;
+    max-width: 620px;
+    width: 100%;
+    margin-top: 28px;
+  }
+  .traction-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 16px 20px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 10px;
+    text-align: left;
+    transition: border-color 0.2s;
+  }
+  .traction-list li:hover { border-color: var(--cyan); }
+  .traction-list .t-icon { font-size: 22px; flex-shrink: 0; }
+  .traction-list .t-title { font-weight: 700; color: var(--white); font-size: 15px; }
+  .traction-list .t-sub   { font-size: 12px; color: var(--muted); margin-top: 3px; }
+
+  /* ── SLIDE 9 – TEAM ── */
+  .team-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    max-width: 740px;
+    width: 100%;
+    margin-top: 28px;
+  }
+  .team-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 16px;
+    text-align: center;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .team-card:hover { border-color: var(--purple-light); transform: translateY(-2px); }
+  .team-card .avatar {
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--cyan), var(--purple));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    margin: 0 auto 12px;
+  }
+  .team-card .t-name  { font-weight: 700; font-size: 15px; margin-bottom: 4px; }
+  .team-card .t-role  { font-size: 12px; color: var(--cyan); letter-spacing: 0.5px; }
+  .team-card .t-blurb { font-size: 11px; color: var(--muted); margin-top: 8px; line-height: 1.5; }
+
+  /* ── SLIDE 10 – ASK ── */
+  .ask-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 680px;
+  }
+  .ask-amount {
+    font-family: var(--font-mono);
+    font-size: clamp(48px, 9vw, 100px);
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--cyan) 0%, var(--purple-light) 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+    margin-bottom: 10px;
+  }
+  .ask-sub {
+    font-size: 14px;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 28px;
+  }
+  .ask-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    width: 100%;
+    margin-bottom: 24px;
+  }
+  .contact-box {
+    background: linear-gradient(135deg, rgba(0,245,255,0.08), rgba(124,58,237,0.08));
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 24px;
+    font-family: var(--font-mono);
+    font-size: 14px;
+    color: var(--cyan);
+    letter-spacing: 0.5px;
+    margin-top: 8px;
+  }
+
+  /* ── PROGRESS BAR ── */
+  .progress-track {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    height: 4px;
+    background: rgba(255,255,255,0.06);
+    z-index: 100;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--cyan), var(--purple));
+    transition: width 0.4s ease;
+    border-radius: 0 2px 2px 0;
+    box-shadow: 0 0 8px rgba(0,245,255,0.5);
+  }
+
+  /* ── NAV BUTTONS ── */
+  .nav-buttons {
+    position: fixed;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 101;
+  }
+  .nav-btn {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    color: var(--white);
+    cursor: pointer;
+    border-radius: 8px;
+    width: 38px; height: 30px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    transition: background 0.2s, border-color 0.2s, color 0.2s;
+    user-select: none;
+  }
+  .nav-btn:hover:not(:disabled) {
+    background: rgba(0,245,255,0.1);
+    border-color: rgba(0,245,255,0.4);
+    color: var(--cyan);
+  }
+  .nav-btn:disabled { opacity: 0.25; cursor: default; }
+  .slide-dots {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+  .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s, width 0.25s;
+  }
+  .dot.active {
+    background: var(--cyan);
+    width: 18px;
+    border-radius: 3px;
+    box-shadow: 0 0 6px rgba(0,245,255,0.6);
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 700px) {
+    .slide { padding: 20px 18px; }
+    .limbs-grid { grid-template-columns: repeat(2, 1fr); }
+    .card-grid.cols-3 { grid-template-columns: 1fr 1fr; }
+    .card-grid.cols-2 { grid-template-columns: 1fr; }
+    .team-grid { grid-template-columns: 1fr 1fr; }
+    .ask-grid { grid-template-columns: 1fr; }
+    .funnel-sam { width: 100%; }
+    .funnel-som { width: 100%; }
+    nav .nav-title { display: none; }
+  }
+  @media (max-width: 480px) {
+    .limbs-grid { grid-template-columns: repeat(2, 1fr); }
+    .team-grid { grid-template-columns: 1fr 1fr; }
+  }
+
+  /* grid bg decor */
+  .grid-bg {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,245,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,245,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+  }
+
+  /* glow orbs */
+  .orb {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    filter: blur(80px);
+  }
+  .orb-cyan  { background: rgba(0,245,255,0.12); }
+  .orb-purple{ background: rgba(124,58,237,0.15); }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="hub-link">← Hub</a>
+  <span class="nav-title">PITCH DECK — ABC82100</span>
+  <span class="slide-counter" id="counter">Slide 1 / 10</span>
+</nav>
+
+<!-- SLIDE STAGE -->
+<div class="stage" id="stage">
+
+  <!-- ── SLIDE 1: COVER ── -->
+  <div class="slide active" id="slide-1">
+    <div class="orb orb-purple" style="width:500px;height:500px;top:-100px;left:-100px;"></div>
+    <div class="orb orb-cyan"   style="width:400px;height:400px;bottom:-80px;right:-80px;"></div>
+    <div class="grid-bg"></div>
+    <div class="cover-glyph">🧩</div>
+    <div class="slide-label">Investor Pitch Deck · 2026</div>
+    <h1><span class="grad-text">SOLVED: ABC82100</span></h1>
+    <div class="hdivider" style="margin-bottom:18px;"></div>
+    <h2 style="font-size:clamp(16px,2.8vw,28px);color:var(--muted);font-weight:400;">ARC-AGI Task Solved</h2>
+    <div class="cover-badges">
+      <span class="badge">🏆 GitMonsters</span>
+      <span class="badge purple-badge">⚡ 2026</span>
+      <span class="badge">🚀 Seed Round</span>
+    </div>
+    <p style="margin-top:24px;font-size:14px;">Proving genuine machine reasoning — one task at a time.</p>
+  </div>
+
+  <!-- ── SLIDE 2: THE PROBLEM ── -->
+  <div class="slide" id="slide-2">
+    <div class="orb orb-cyan" style="width:300px;height:300px;top:0;right:0;"></div>
+    <div class="slide-label">02 / The Challenge</div>
+    <h2>ARC-AGI is the <span class="cyan">Hardest</span> Unsolved AI Benchmark</h2>
+    <div class="hdivider"></div>
+    <p style="max-width:640px;">It tests genuine reasoning, not memorization. Standard LLMs and neural nets fail catastrophically. The gap between human and machine intelligence is most visible here.</p>
+    <ul class="bullet-list">
+      <li><strong>99% of AI systems fail</strong> — even the best frontier models struggle below 50% accuracy</li>
+      <li><strong>No pattern-matching tricks</strong> — every task is a novel visual puzzle requiring true abstraction</li>
+      <li><strong>Human baseline: ~84%</strong> — machines average well under 30% on unseen tasks</li>
+      <li><strong>$1M prize</strong> — ARC Prize Foundation put up real money; it remains largely unclaimed</li>
+      <li><strong>The benchmark that matters</strong> — solving ARC-AGI is a credible proxy for general intelligence</li>
+    </ul>
+  </div>
+
+  <!-- ── SLIDE 3: OUR SOLUTION ── -->
+  <div class="slide" id="slide-3">
+    <div class="orb orb-purple" style="width:400px;height:400px;bottom:-100px;left:-100px;"></div>
+    <div class="slide-label">03 / Our Approach</div>
+    <h2>8-Limb <span class="cyan">Compound Loop</span> Architecture</h2>
+    <div class="hdivider"></div>
+    <p>Each limb specializes in a distinct reasoning mode. The compound intelligence cycle synthesizes them into a coherent solution.</p>
+    <div class="limbs-grid">
+      <div class="limb-card"><div class="limb-icon">👁️</div><div class="limb-name">Perception</div><div class="limb-desc">Grid feature extraction &amp; scene parsing</div></div>
+      <div class="limb-card"><div class="limb-icon">🔺</div><div class="limb-name">Pattern</div><div class="limb-desc">Symmetry, repetition &amp; transformation detection</div></div>
+      <div class="limb-card"><div class="limb-icon">🧮</div><div class="limb-name">Symbolic</div><div class="limb-desc">Rule induction &amp; logical constraint solving</div></div>
+      <div class="limb-card"><div class="limb-icon">🌐</div><div class="limb-name">Spatial</div><div class="limb-desc">Topological reasoning &amp; object relationships</div></div>
+      <div class="limb-card"><div class="limb-icon">🔄</div><div class="limb-name">Analogy</div><div class="limb-desc">Cross-example mapping &amp; transfer</div></div>
+      <div class="limb-card"><div class="limb-icon">📐</div><div class="limb-name">Geometry</div><div class="limb-desc">Shape, size, rotation &amp; reflection ops</div></div>
+      <div class="limb-card"><div class="limb-icon">🗂️</div><div class="limb-name">Memory</div><div class="limb-desc">Working memory &amp; context accumulation</div></div>
+      <div class="limb-card"><div class="limb-icon">🎯</div><div class="limb-name">Synthesis</div><div class="limb-desc">Multi-hypothesis voting &amp; final answer</div></div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 4: TECHNOLOGY ── -->
+  <div class="slide" id="slide-4">
+    <div class="orb orb-cyan" style="width:350px;height:350px;top:-60px;right:-60px;"></div>
+    <div class="slide-label">04 / Under the Hood</div>
+    <h2>Production-Grade <span class="grad-text">AI Stack</span></h2>
+    <div class="hdivider"></div>
+    <div class="tech-diagram">
+      <div class="tech-layer" style="border-color:rgba(0,245,255,0.35);">
+        <span class="layer-icon">🧠</span>
+        <div><div class="layer-title">64-Expert Mixture-of-Experts Grid</div><div class="layer-sub">Sparse activation — only the 8 most relevant experts fire per token, massively reducing compute</div></div>
+      </div>
+      <div class="tech-connector"></div>
+      <div class="tech-layer" style="border-color:rgba(168,85,247,0.35);">
+        <span class="layer-icon">⚡</span>
+        <div><div class="layer-title">Dynamic Expert Routing</div><div class="layer-sub">Learned gating function scores each expert; top-k routing with load balancing penalty</div></div>
+      </div>
+      <div class="tech-connector"></div>
+      <div class="tech-layer" style="border-color:rgba(0,245,255,0.35);">
+        <span class="layer-icon">🔣</span>
+        <div><div class="layer-title">Symbolic Reasoning Layer</div><div class="layer-sub">Neuro-symbolic bridge: neural features → predicate logic → verified rule application</div></div>
+      </div>
+      <div class="tech-connector"></div>
+      <div class="tech-layer" style="border-color:rgba(168,85,247,0.35);">
+        <span class="layer-icon">🔁</span>
+        <div><div class="layer-title">Compound Intelligence Cycle</div><div class="layer-sub">Iterative refinement loop: perceive → hypothesize → verify → revise, up to N passes</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 5: DEMO ── -->
+  <div class="slide" id="slide-5">
+    <div class="orb orb-purple" style="width:380px;height:380px;top:-80px;right:-80px;"></div>
+    <div class="slide-label">05 / Live System</div>
+    <h2>Fully Deployed — <span class="cyan">6 Interactive Pages</span></h2>
+    <div class="hdivider"></div>
+    <p>Our system isn't a research paper. It's a live, working product accessible right now.</p>
+    <div class="card-grid cols-3" style="margin-top:22px;">
+      <div class="card"><div class="card-icon">🏠</div><div class="card-title">Hub</div><div class="card-body">Central navigation &amp; system overview with status indicators</div></div>
+      <div class="card"><div class="card-icon">🧩</div><div class="card-title">Task Viewer</div><div class="card-body">Interactive ARC grid display with color mapping &amp; zoom</div></div>
+      <div class="card"><div class="card-icon">🤖</div><div class="card-title">AI Solver</div><div class="card-body">Live solver interface with step-by-step reasoning trace</div></div>
+      <div class="card"><div class="card-icon">📊</div><div class="card-title">Analysis</div><div class="card-body">Pattern breakdown &amp; confidence scoring per rule</div></div>
+      <div class="card"><div class="card-icon">📈</div><div class="card-title">Results</div><div class="card-body">Solution output, ground-truth comparison &amp; accuracy metrics</div></div>
+      <div class="card" style="border-color:rgba(0,245,255,0.35);background:rgba(0,245,255,0.05);">
+        <div class="card-icon">📽️</div>
+        <div class="card-title" style="color:var(--purple-light);">Pitch Deck</div>
+        <div class="card-body">You are here. <a href="index.html" style="color:var(--cyan);text-decoration:none;">← Back to Hub</a></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 6: MARKET ── -->
+  <div class="slide" id="slide-6">
+    <div class="orb orb-cyan" style="width:340px;height:340px;bottom:-60px;left:-60px;"></div>
+    <div class="slide-label">06 / Market Opportunity</div>
+    <h2>A <span class="grad-text">$47 Billion</span> Reasoning Market</h2>
+    <div class="hdivider"></div>
+    <p>Enterprise AI is shifting from language generation to reliable reasoning. We're positioned at the center of that shift.</p>
+    <div class="market-funnel">
+      <div class="funnel-row funnel-tam">
+        <div class="funnel-left">
+          <div class="funnel-label cyan">TAM</div>
+          <div class="funnel-desc">Total AI Reasoning &amp; Inference Market</div>
+        </div>
+        <div class="funnel-val cyan">$47B</div>
+      </div>
+      <div class="funnel-row funnel-sam" style="align-self:center;">
+        <div class="funnel-left">
+          <div class="funnel-label purple">SAM</div>
+          <div class="funnel-desc">Enterprise Neuro-Symbolic AI</div>
+        </div>
+        <div class="funnel-val purple">$8B</div>
+      </div>
+      <div class="funnel-row funnel-som" style="align-self:center;">
+        <div class="funnel-left">
+          <div class="funnel-label" style="color:var(--purple-light);">SOM</div>
+          <div class="funnel-desc">Year 1 Serviceable Obtainable</div>
+        </div>
+        <div class="funnel-val" style="color:var(--purple-light);">$400M</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:20px;margin-top:20px;flex-wrap:wrap;justify-content:center;">
+      <span class="badge">📈 42% CAGR</span>
+      <span class="badge purple-badge">🏢 Fortune 500 Demand</span>
+      <span class="badge">🌍 Global TAM</span>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 7: BUSINESS MODEL ── -->
+  <div class="slide" id="slide-7">
+    <div class="orb orb-purple" style="width:360px;height:360px;top:-60px;left:-60px;"></div>
+    <div class="slide-label">07 / Revenue Model</div>
+    <h2>Three <span class="cyan">Revenue Streams</span></h2>
+    <div class="hdivider"></div>
+    <p>Diversified monetization from day one, scaling with customer sophistication.</p>
+    <div class="revenue-bars">
+      <div class="rev-item">
+        <div class="rev-header">
+          <span class="rev-name">⚡ API Licensing</span>
+          <span class="rev-pct">55%</span>
+        </div>
+        <div class="rev-bar-bg"><div class="rev-bar-fill" style="width:55%;background:linear-gradient(90deg,var(--cyan),#0af0c0);"></div></div>
+        <p style="font-size:12px;margin-top:5px;">Pay-per-inference &amp; monthly subscription tiers. $0.002/call → enterprise flat-rate SLAs.</p>
+      </div>
+      <div class="rev-item">
+        <div class="rev-header">
+          <span class="rev-name">🏢 Enterprise Contracts</span>
+          <span class="rev-pct">30%</span>
+        </div>
+        <div class="rev-bar-bg"><div class="rev-bar-fill" style="width:30%;background:linear-gradient(90deg,var(--purple),var(--purple-light));"></div></div>
+        <p style="font-size:12px;margin-top:5px;">Private deployments, custom fine-tuning, dedicated support. ACV $250K–$2M.</p>
+      </div>
+      <div class="rev-item">
+        <div class="rev-header">
+          <span class="rev-name">🔬 Research Partnerships</span>
+          <span class="rev-pct">15%</span>
+        </div>
+        <div class="rev-bar-bg"><div class="rev-bar-fill" style="width:15%;background:linear-gradient(90deg,#f59e0b,#ef4444);"></div></div>
+        <p style="font-size:12px;margin-top:5px;">Lab collaborations, benchmark licensing, co-publication agreements with top universities.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 8: TRACTION ── -->
+  <div class="slide" id="slide-8">
+    <div class="orb orb-cyan" style="width:320px;height:320px;bottom:-40px;right:-40px;"></div>
+    <div class="slide-label">08 / Traction &amp; Milestones</div>
+    <h2>We Ship. <span class="cyan">Here's Proof.</span></h2>
+    <div class="hdivider"></div>
+    <ul class="traction-list">
+      <li>
+        <span class="t-icon">✅</span>
+        <div><div class="t-title">Task ABC82100: SOLVED</div><div class="t-sub">Verified solution submitted — one of the hardest ARC-AGI tasks in the benchmark</div></div>
+      </li>
+      <li>
+        <span class="t-icon">🌐</span>
+        <div><div class="t-title">Demo Live in Production</div><div class="t-sub">Fully deployed, publicly accessible interactive system — no "coming soon"</div></div>
+      </li>
+      <li>
+        <span class="t-icon">📱</span>
+        <div><div class="t-title">6-Page Interactive System</div><div class="t-sub">Hub, Task Viewer, AI Solver, Analysis, Results, Pitch Deck — all connected</div></div>
+      </li>
+      <li>
+        <span class="t-icon">👾</span>
+        <div><div class="t-title">GitMonsters Team Assembled</div><div class="t-sub">Builders, researchers, and engineers aligned around the hardest problems in AI</div></div>
+      </li>
+    </ul>
+  </div>
+
+  <!-- ── SLIDE 9: TEAM ── -->
+  <div class="slide" id="slide-9">
+    <div class="orb orb-purple" style="width:420px;height:420px;top:-80px;right:-100px;"></div>
+    <div class="slide-label">09 / The Team</div>
+    <h2>Built by <span class="grad-text">GitMonsters</span></h2>
+    <div class="hdivider"></div>
+    <p>Passionate about solving the hardest problems in AI. We don't wait for benchmarks to be solved — we solve them.</p>
+    <div class="team-grid">
+      <div class="team-card">
+        <div class="avatar">🦾</div>
+        <div class="t-name">The Architect</div>
+        <div class="t-role">Systems Design</div>
+        <div class="t-blurb">Designed the 8-limb compound loop architecture from first principles</div>
+      </div>
+      <div class="team-card">
+        <div class="avatar">🧠</div>
+        <div class="t-name">The Researcher</div>
+        <div class="t-role">AI / ML Lead</div>
+        <div class="t-blurb">Spearheads the MoE training pipeline and symbolic reasoning layer</div>
+      </div>
+      <div class="team-card">
+        <div class="avatar">⚡</div>
+        <div class="t-name">The Builder</div>
+        <div class="t-role">Full-Stack Engineer</div>
+        <div class="t-blurb">Ships the live demo system — 6 pages, zero excuses, always deployed</div>
+      </div>
+      <div class="team-card">
+        <div class="avatar">🔬</div>
+        <div class="t-name">The Analyst</div>
+        <div class="t-role">Benchmarks &amp; Eval</div>
+        <div class="t-blurb">Owns the evaluation harness, dataset curation, and result verification</div>
+      </div>
+      <div class="team-card">
+        <div class="avatar">🌐</div>
+        <div class="t-name">The Connector</div>
+        <div class="t-role">Partnerships &amp; GTM</div>
+        <div class="t-blurb">Translates deep-tech breakthroughs into enterprise and research deals</div>
+      </div>
+      <div class="team-card" style="border-color:rgba(0,245,255,0.3);background:rgba(0,245,255,0.04);">
+        <div class="avatar" style="background:linear-gradient(135deg,#00f5ff,#0af0c0);">➕</div>
+        <div class="t-name" style="color:var(--cyan);">Your Role</div>
+        <div class="t-role">Investor / Advisor</div>
+        <div class="t-blurb">We're building the team that solves ARC-AGI. Join us.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 10: ASK ── -->
+  <div class="slide" id="slide-10">
+    <div class="orb orb-cyan"   style="width:400px;height:400px;top:-80px;left:-80px;"></div>
+    <div class="orb orb-purple" style="width:400px;height:400px;bottom:-80px;right:-80px;"></div>
+    <div class="grid-bg"></div>
+    <div class="slide-label">10 / The Ask</div>
+    <div class="ask-center">
+      <div class="ask-amount">$2M</div>
+      <div class="ask-sub">Seed Round · 18-Month Runway</div>
+      <div class="ask-grid">
+        <div class="card" style="text-align:center;">
+          <div class="card-icon" style="text-align:center;">🗓️</div>
+          <div class="card-title" style="text-align:center;">18-Month Runway</div>
+          <div class="card-body" style="text-align:center;">Full team salaries + compute budget for full ARC benchmark assault</div>
+        </div>
+        <div class="card" style="text-align:center;">
+          <div class="card-icon" style="text-align:center;">🎯</div>
+          <div class="card-title" style="text-align:center;">Roadmap</div>
+          <div class="card-body" style="text-align:center;">Expand from ABC82100 → full ARC benchmark → enterprise product GA</div>
+        </div>
+        <div class="card" style="text-align:center;">
+          <div class="card-icon" style="text-align:center;">🖥️</div>
+          <div class="card-title" style="text-align:center;">Compute Scale</div>
+          <div class="card-body" style="text-align:center;">Scale MoE training to 64B parameters; deploy inference cluster</div>
+        </div>
+        <div class="card" style="text-align:center;">
+          <div class="card-icon" style="text-align:center;">🤝</div>
+          <div class="card-title" style="text-align:center;">Use of Funds</div>
+          <div class="card-body" style="text-align:center;">50% R&amp;D · 25% Infrastructure · 15% Team · 10% GTM</div>
+        </div>
+      </div>
+      <div class="contact-box">📧 &nbsp; team@gitmonsters.ai</div>
+      <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
+        <span class="badge">🏆 Task ABC82100 SOLVED</span>
+        <span class="badge purple-badge">🚀 Seed Round Open</span>
+        <span class="badge">💡 Genuine AI Reasoning</span>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /stage -->
+
+<!-- NAVIGATION BUTTONS -->
+<div class="nav-buttons">
+  <button class="nav-btn" id="btn-prev" disabled>&#8592;</button>
+  <div class="slide-dots" id="dots"></div>
+  <button class="nav-btn" id="btn-next">&#8594;</button>
+</div>
+
+<!-- PROGRESS BAR -->
+<div class="progress-track">
+  <div class="progress-fill" id="progress"></div>
+</div>
+
+<script>
+(function () {
+  const TOTAL = 10;
+  let current = 0; // 0-indexed
+  let animating = false;
+
+  const slides   = Array.from(document.querySelectorAll('.slide'));
+  const counter  = document.getElementById('counter');
+  const progress = document.getElementById('progress');
+  const btnPrev  = document.getElementById('btn-prev');
+  const btnNext  = document.getElementById('btn-next');
+  const dotsEl   = document.getElementById('dots');
+
+  // Build dots
+  for (let i = 0; i < TOTAL; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === 0 ? ' active' : '');
+    d.addEventListener('click', () => goTo(i));
+    dotsEl.appendChild(d);
+  }
+
+  function updateUI() {
+    const n = current + 1;
+    counter.textContent = `Slide ${n} / ${TOTAL}`;
+    progress.style.width = `${(n / TOTAL) * 100}%`;
+    btnPrev.disabled = current === 0;
+    btnNext.disabled = current === TOTAL - 1;
+    document.querySelectorAll('.dot').forEach((d, i) => {
+      d.classList.toggle('active', i === current);
+    });
+  }
+
+  function goTo(idx) {
+    if (animating || idx === current || idx < 0 || idx >= TOTAL) return;
+    animating = true;
+
+    const prev = slides[current];
+    const next = slides[idx];
+
+    // exit current
+    prev.classList.add('exit');
+    prev.classList.remove('active');
+
+    // enter next with tiny delay
+    setTimeout(() => {
+      prev.classList.remove('exit');
+      current = idx;
+      next.classList.add('active');
+      updateUI();
+      animating = false;
+    }, 420);
+  }
+
+  btnPrev.addEventListener('click', () => goTo(current - 1));
+  btnNext.addEventListener('click', () => goTo(current + 1));
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') goTo(current + 1);
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   goTo(current - 1);
+  });
+
+  // Touch/swipe support
+  let touchStartX = 0;
+  document.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; }, { passive: true });
+  document.addEventListener('touchend',   (e) => {
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    if (Math.abs(dx) > 40) dx < 0 ? goTo(current + 1) : goTo(current - 1);
+  }, { passive: true });
+
+  updateUI();
+})();
+</script>
+</body>
+</html>

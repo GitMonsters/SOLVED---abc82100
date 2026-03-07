@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Architecture — ABC82100</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg:#0a0e1a;
+  --bg2:#0d1224;
+  --bg3:#111827;
+  --bg4:#0f1628;
+  --cyan:#00f5ff;
+  --cyan2:rgba(0,245,255,0.15);
+  --purple:#7c3aed;
+  --purple-l:#a855f7;
+  --green:#00ff88;
+  --white:#ffffff;
+  --dim:rgba(255,255,255,0.08);
+  --gc:0 0 20px rgba(0,245,255,0.5),0 0 40px rgba(0,245,255,0.25);
+  --gp:0 0 20px rgba(124,58,237,0.5),0 0 40px rgba(124,58,237,0.25);
+}
+
+html{scroll-behavior:smooth}
+
+body{
+  background:var(--bg);
+  color:#fff;
+  font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  min-height:100vh;
+  overflow-x:hidden;
+  line-height:1.5;
+}
+
+/* ── NAV ── */
+nav{
+  position:sticky;top:0;z-index:200;
+  display:flex;align-items:center;gap:.75rem;
+  padding:.65rem 2rem;
+  background:rgba(10,14,26,.96);
+  backdrop-filter:blur(12px);
+  border-bottom:1px solid rgba(0,245,255,.18);
+}
+nav a{
+  color:var(--cyan);text-decoration:none;
+  font-family:ui-monospace,monospace;font-size:.82rem;
+  display:flex;align-items:center;gap:.35rem;
+  padding:.28rem .7rem;
+  border:1px solid rgba(0,245,255,.3);border-radius:4px;
+  transition:all .2s;letter-spacing:.04em;
+  white-space:nowrap;
+}
+nav a:hover{background:rgba(0,245,255,.1);box-shadow:var(--gc)}
+.nav-title{
+  font-family:ui-monospace,monospace;font-size:.75rem;
+  color:rgba(255,255,255,.4);letter-spacing:.12em;
+  margin-left:auto;text-transform:uppercase;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+
+/* ── HEADER ── */
+.page-header{
+  text-align:center;padding:3rem 2rem 1rem;
+  position:relative;overflow:hidden;
+}
+.page-header::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(124,58,237,.12) 0%,transparent 70%);
+  pointer-events:none;
+}
+.page-header h1{
+  font-family:ui-monospace,monospace;
+  font-size:clamp(1.3rem,4vw,2.1rem);
+  letter-spacing:.12em;
+  background:linear-gradient(135deg,var(--cyan) 0%,var(--purple-l) 55%,var(--cyan) 100%);
+  background-size:200% auto;
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+  animation:textShimmer 4s linear infinite;
+}
+@keyframes textShimmer{to{background-position:200% center}}
+.page-header p{
+  margin-top:.6rem;
+  color:rgba(255,255,255,.4);
+  font-family:ui-monospace,monospace;font-size:.75rem;
+  letter-spacing:.06em;
+}
+
+/* ── SECTIONS ── */
+.section{max-width:920px;margin:0 auto;padding:2rem 1.5rem}
+
+.section-heading{
+  display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;
+}
+.section-heading::before{
+  content:'';flex:1;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(0,245,255,.3));
+}
+.section-heading::after{
+  content:'';flex:1;height:1px;
+  background:linear-gradient(270deg,transparent,rgba(0,245,255,.3));
+}
+.section-heading h2{
+  font-family:ui-monospace,monospace;font-size:.88rem;
+  letter-spacing:.14em;color:var(--cyan);
+  text-transform:uppercase;white-space:nowrap;
+}
+
+/* ── CARD ── */
+.card{
+  background:var(--bg2);
+  border:1px solid rgba(0,245,255,.12);
+  border-radius:12px;
+  padding:1.25rem;
+  position:relative;overflow:hidden;
+}
+.card::before{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse 70% 50% at 50% 100%,rgba(124,58,237,.06) 0%,transparent 70%);
+}
+
+/* ── DIAGRAM SVG ── */
+.diagram-wrap{display:flex;justify-content:center}
+.arch-svg{
+  width:100%;max-width:560px;
+  display:block;
+  cursor:default;
+}
+
+/* ── INFO PANEL (limb) ── */
+.info-panel{
+  margin-top:1rem;
+  background:var(--bg3);
+  border:1px solid rgba(0,245,255,.25);border-radius:8px;
+  padding:1.25rem 1.5rem 1.25rem 1.75rem;
+  min-height:90px;
+  position:relative;overflow:hidden;
+  transition:opacity .3s,border-color .3s;
+}
+.info-panel::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
+  background:linear-gradient(180deg,var(--cyan),var(--purple));
+}
+.info-panel.empty{opacity:.35;pointer-events:none}
+.info-panel h3{
+  font-family:ui-monospace,monospace;font-size:1rem;
+  color:var(--cyan);margin-bottom:.45rem;
+  display:flex;align-items:center;gap:.5rem;
+}
+.info-panel p{
+  font-family:ui-monospace,monospace;font-size:.82rem;
+  color:rgba(255,255,255,.7);line-height:1.65;margin-bottom:.75rem;
+}
+.cap-list{display:flex;flex-wrap:wrap;gap:.35rem}
+.cap{
+  font-family:ui-monospace,monospace;font-size:.68rem;
+  padding:.18rem .55rem;
+  background:rgba(124,58,237,.18);
+  border:1px solid rgba(168,85,247,.35);
+  border-radius:4px;color:var(--purple-l);
+}
+.placeholder{
+  font-family:ui-monospace,monospace;font-size:.82rem;
+  color:rgba(255,255,255,.25);text-align:center;
+  padding:1.5rem 0;
+}
+
+/* ── MOE GRID ── */
+.moe-header{
+  display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:.75rem;margin-bottom:1rem;
+}
+.moe-stats{
+  font-family:ui-monospace,monospace;font-size:.75rem;
+  color:rgba(255,255,255,.45);
+}
+.moe-stats span{color:var(--cyan)}
+.btn-rand{
+  font-family:ui-monospace,monospace;font-size:.78rem;
+  padding:.45rem .9rem;
+  background:rgba(124,58,237,.2);
+  border:1px solid rgba(124,58,237,.45);
+  border-radius:6px;color:var(--purple-l);
+  cursor:pointer;transition:all .2s;letter-spacing:.04em;
+}
+.btn-rand:hover{background:rgba(124,58,237,.35);box-shadow:var(--gp)}
+.btn-rand:active{transform:scale(.97)}
+
+.moe-grid{
+  display:grid;
+  grid-template-columns:repeat(8,1fr);
+  gap:4px;padding:1rem;
+}
+.ecell{
+  aspect-ratio:1;
+  display:flex;align-items:center;justify-content:center;
+  font-family:ui-monospace,monospace;
+  font-size:clamp(.5rem,1.4vw,.72rem);
+  border-radius:4px;cursor:pointer;
+  border:1px solid;user-select:none;
+  transition:transform .15s,box-shadow .25s,background .25s,border-color .25s,color .25s;
+  position:relative;
+}
+.ecell.off{
+  background:rgba(255,255,255,.025);
+  border-color:rgba(255,255,255,.07);
+  color:rgba(255,255,255,.22);
+}
+.ecell.off:hover{
+  background:rgba(255,255,255,.06);
+  border-color:rgba(255,255,255,.18);
+  color:rgba(255,255,255,.55);
+  transform:scale(1.08);
+}
+.ecell.on{
+  background:rgba(0,245,255,.09);
+  border-color:rgba(0,245,255,.45);
+  color:var(--cyan);
+  animation:cpulse 2.2s ease-in-out infinite;
+}
+.ecell.on2{
+  background:rgba(0,255,136,.09);
+  border-color:rgba(0,255,136,.45);
+  color:var(--green);
+  animation:gpulse 2.6s ease-in-out infinite;
+}
+.ecell.sel{
+  background:rgba(0,245,255,.22)!important;
+  border-color:var(--cyan)!important;
+  color:#fff!important;
+  box-shadow:0 0 14px rgba(0,245,255,.55),inset 0 0 8px rgba(0,245,255,.12)!important;
+  transform:scale(1.08)!important;
+  animation:none!important;
+  z-index:2;
+}
+@keyframes cpulse{
+  0%,100%{box-shadow:0 0 6px rgba(0,245,255,.25)}
+  50%{box-shadow:0 0 14px rgba(0,245,255,.55),inset 0 0 8px rgba(0,245,255,.08)}
+}
+@keyframes gpulse{
+  0%,100%{box-shadow:0 0 6px rgba(0,255,136,.25)}
+  50%{box-shadow:0 0 14px rgba(0,255,136,.55),inset 0 0 8px rgba(0,255,136,.08)}
+}
+
+/* Expert info panel */
+.expert-panel{
+  margin-top:1rem;
+  background:var(--bg3);
+  border:1px solid rgba(0,245,255,.25);border-radius:8px;
+  padding:1.25rem 1.5rem 1.25rem 1.75rem;
+  min-height:80px;position:relative;overflow:hidden;
+  transition:opacity .3s;
+}
+.expert-panel::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
+  background:linear-gradient(180deg,var(--green),var(--cyan));
+}
+.expert-panel.empty{opacity:.35;pointer-events:none}
+.expert-panel h3{
+  font-family:ui-monospace,monospace;font-size:.95rem;
+  color:var(--cyan);margin-bottom:.4rem;
+  display:flex;align-items:center;gap:.5rem;
+}
+.expert-panel .spec{
+  font-family:ui-monospace,monospace;font-size:.88rem;
+  color:#fff;font-weight:600;margin-bottom:.5rem;
+}
+.expert-meta{
+  display:flex;flex-wrap:wrap;gap:.75rem;
+}
+.expert-meta span{
+  font-family:ui-monospace,monospace;font-size:.72rem;
+  color:rgba(255,255,255,.45);
+}
+.expert-meta span b{color:rgba(255,255,255,.75)}
+.expert-meta .status-on{color:var(--cyan)}
+.expert-meta .status-off{color:rgba(255,255,255,.3)}
+
+/* Legend */
+.legend{
+  display:flex;flex-wrap:wrap;gap:1.25rem;
+  margin-top:.75rem;padding-top:.75rem;
+  border-top:1px solid rgba(255,255,255,.06);
+}
+.legend-item{
+  display:flex;align-items:center;gap:.4rem;
+  font-family:ui-monospace,monospace;font-size:.72rem;
+  color:rgba(255,255,255,.45);
+}
+.ldot{width:10px;height:10px;border-radius:3px;border:1px solid;flex-shrink:0}
+.ldot.c{background:rgba(0,245,255,.15);border-color:var(--cyan)}
+.ldot.g{background:rgba(0,255,136,.15);border-color:var(--green)}
+.ldot.d{background:rgba(255,255,255,.03);border-color:rgba(255,255,255,.12)}
+
+/* ── FOOTER ── */
+footer{
+  text-align:center;padding:2rem 1rem;
+  font-family:ui-monospace,monospace;font-size:.7rem;
+  color:rgba(255,255,255,.18);
+  border-top:1px solid rgba(255,255,255,.05);
+  margin-top:1rem;
+}
+
+/* ── RESPONSIVE ── */
+@media(max-width:540px){
+  nav{padding:.55rem 1rem}
+  .nav-title{display:none}
+  .section{padding:1.5rem 1rem}
+  .moe-grid{gap:2px;padding:.6rem}
+  .info-panel,.expert-panel{padding:1rem 1.25rem 1rem 1.5rem}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html">← Hub</a>
+  <span class="nav-title">ARCHITECTURE — ABC82100</span>
+</nav>
+
+<!-- HEADER -->
+<header class="page-header">
+  <h1>System Architecture — ABC82100</h1>
+  <p>8-limb cognitive loop &nbsp;·&nbsp; compound feedback ring &nbsp;·&nbsp; 64-expert mixture of experts</p>
+</header>
+
+<!-- DIAGRAM SECTION -->
+<section class="section">
+  <div class="section-heading"><h2>⬡ Cognitive Architecture — 8-Limb Loop</h2></div>
+  <div class="card">
+    <div class="diagram-wrap">
+      <svg class="arch-svg" id="archSvg" viewBox="0 0 600 600" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="8-limb cognitive architecture diagram">
+        <defs>
+          <radialGradient id="gCore" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#00f5ff" stop-opacity=".35"/>
+            <stop offset="60%" stop-color="#7c3aed" stop-opacity=".2"/>
+            <stop offset="100%" stop-color="#0d1224" stop-opacity=".95"/>
+          </radialGradient>
+          <radialGradient id="gNode" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#7c3aed" stop-opacity=".45"/>
+            <stop offset="100%" stop-color="#0a0e1a" stop-opacity=".95"/>
+          </radialGradient>
+          <radialGradient id="gNodeActive" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#00f5ff" stop-opacity=".3"/>
+            <stop offset="100%" stop-color="#0a0e1a" stop-opacity=".95"/>
+          </radialGradient>
+          <radialGradient id="gParticle" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#00f5ff"/>
+            <stop offset="100%" stop-color="#00f5ff" stop-opacity="0"/>
+          </radialGradient>
+          <filter id="fGlow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="3" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+          <filter id="fGlow2" x="-80%" y="-80%" width="260%" height="260%">
+            <feGaussianBlur stdDeviation="7" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+          <filter id="fGlowPurple" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="4" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+          <marker id="arrCyan" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto">
+            <path d="M0,0 L7,3.5 L0,7 Z" fill="#00f5ff" opacity=".6"/>
+          </marker>
+        </defs>
+
+        <!-- Decorative background rings -->
+        <circle cx="300" cy="300" r="248" fill="none" stroke="rgba(124,58,237,.06)" stroke-width="1" stroke-dasharray="2,10"/>
+        <circle cx="300" cy="300" r="210" fill="none" stroke="rgba(0,245,255,.07)" stroke-width="1" stroke-dasharray="4,8"/>
+        <circle cx="300" cy="300" r="155" fill="none" stroke="rgba(124,58,237,.05)" stroke-width="1" stroke-dasharray="3,12"/>
+
+        <!-- Arms group (drawn by JS) -->
+        <g id="svgArms"></g>
+
+        <!-- Ring connections between adjacent limbs (drawn by JS) -->
+        <g id="svgRing"></g>
+
+        <!-- Animated particle + glow halo -->
+        <circle id="ptHalo" r="14" fill="url(#gParticle)" opacity=".5"/>
+        <circle id="ptCore" r="5" fill="#00f5ff" filter="url(#fGlow2)" opacity=".95"/>
+
+        <!-- Core node -->
+        <g id="coreNode">
+          <circle cx="300" cy="300" r="52" fill="url(#gCore)" stroke="rgba(0,245,255,.5)" stroke-width="1.5" filter="url(#fGlow)" opacity=".95"/>
+          <circle cx="300" cy="300" r="43" fill="none" stroke="rgba(0,245,255,.2)" stroke-width="1"/>
+          <text x="300" y="295" text-anchor="middle" fill="#00f5ff" font-family="ui-monospace,monospace" font-size="14" font-weight="700" letter-spacing="2">CORE</text>
+          <text x="300" y="313" text-anchor="middle" fill="rgba(255,255,255,.4)" font-family="ui-monospace,monospace" font-size="8" letter-spacing="1.5">ABC82100</text>
+        </g>
+
+        <!-- Limb nodes (drawn by JS) -->
+        <g id="svgLimbs"></g>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Limb info panel -->
+  <div class="info-panel empty" id="limbPanel">
+    <div class="placeholder">← Click a limb node to explore its function</div>
+  </div>
+</section>
+
+<!-- MOE SECTION -->
+<section class="section">
+  <div class="section-heading"><h2>⬡ Mixture of Experts — 64 Specialists</h2></div>
+
+  <div class="moe-header">
+    <div class="moe-stats">
+      Active: <span id="activeCount">0</span> / 64 experts &nbsp;·&nbsp;
+      Selected: <span id="selLabel">none</span>
+    </div>
+    <button class="btn-rand" id="btnRand">🔀 Randomize Activation</button>
+  </div>
+
+  <div class="card">
+    <div class="moe-grid" id="moeGrid"></div>
+    <div class="legend">
+      <div class="legend-item"><div class="ldot c"></div>Active (primary)</div>
+      <div class="legend-item"><div class="ldot g"></div>Active (secondary)</div>
+      <div class="legend-item"><div class="ldot d"></div>Inactive</div>
+    </div>
+  </div>
+
+  <div class="expert-panel empty" id="expertPanel">
+    <div class="placeholder">← Click an expert cell to view its specialization</div>
+  </div>
+</section>
+
+<footer>ABC82100 &nbsp;·&nbsp; Interactive Architecture Diagram &nbsp;·&nbsp; System visualization v1.0</footer>
+
+<script>
+// ═══════════════════════════════════════════════
+//  DATA
+// ═══════════════════════════════════════════════
+
+const LIMBS = [
+  {
+    id:'perception',  emoji:'👁️',  label:'Perception',     angle:0,
+    desc:'Processes raw grid inputs, extracts features, identifies objects and patterns',
+    caps:['Grid parsing','Feature extraction','Object detection','Pattern recognition','Noise filtering']
+  },
+  {
+    id:'reasoning',   emoji:'🧠',  label:'Reasoning',      angle:45,
+    desc:'Applies logical rules, infers transformations, solves abstract problems',
+    caps:['Rule inference','Logic application','Abstract solving','Constraint satisfaction','Deductive reasoning']
+  },
+  {
+    id:'memory',      emoji:'💾',  label:'Memory',         angle:90,
+    desc:'Stores solved examples, retrieves similar patterns, maintains context',
+    caps:['Example storage','Pattern retrieval','Context maintenance','Episodic recall','Similarity search']
+  },
+  {
+    id:'planning',    emoji:'📋',  label:'Planning',       angle:135,
+    desc:'Breaks problems into steps, creates solution strategies, manages search',
+    caps:['Step decomposition','Strategy creation','Search management','Goal tracking','Backtracking']
+  },
+  {
+    id:'execution',   emoji:'⚡',  label:'Execution',      angle:180,
+    desc:'Applies transformations to grids, generates output, validates results',
+    caps:['Grid transformation','Output generation','Result validation','Action application','State management']
+  },
+  {
+    id:'evaluation',  emoji:'📊',  label:'Evaluation',     angle:225,
+    desc:'Scores candidate solutions, measures confidence, selects best output',
+    caps:['Solution scoring','Confidence measurement','Best-of selection','Error detection','Quality metrics']
+  },
+  {
+    id:'learning',    emoji:'📈',  label:'Learning',       angle:270,
+    desc:'Updates expert weights, refines routing, improves from feedback',
+    caps:['Weight updates','Routing refinement','Feedback integration','Meta-learning','Adaptation']
+  },
+  {
+    id:'communication',emoji:'📡', label:'Communication', angle:315,
+    desc:'Formats output, explains reasoning, interfaces with external systems',
+    caps:['Output formatting','Reasoning explanation','External interfaces','Protocol handling','Response synthesis']
+  }
+];
+
+const SPECIALTIES = [
+  'Shape Rotation Specialist','Color Mapping Expert','Symmetry Detector','Grid Parser',
+  'Pattern Matcher','Rule Inferencer','Edge Case Handler','Transformation Composer',
+  'Spatial Reasoner','Count Verifier','Object Tracker','Sequence Analyzer',
+  'Border Detector','Fill Pattern Expert','Mirror Reflection Specialist','Scaling Specialist'
+];
+
+// ═══════════════════════════════════════════════
+//  SVG HELPERS
+// ═══════════════════════════════════════════════
+
+const NS = 'http://www.w3.org/2000/svg';
+function svgEl(tag, attrs) {
+  const el = document.createElementNS(NS, tag);
+  for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
+  return el;
+}
+
+const CX = 300, CY = 300, RING_R = 210, NODE_R = 34;
+
+function limbPos(angleDeg) {
+  const rad = (angleDeg - 90) * Math.PI / 180;
+  return { x: CX + RING_R * Math.cos(rad), y: CY + RING_R * Math.sin(rad) };
+}
+
+// ═══════════════════════════════════════════════
+//  BUILD DIAGRAM
+// ═══════════════════════════════════════════════
+
+const positions = LIMBS.map(l => ({ ...limbPos(l.angle), ...l }));
+
+function buildDiagram() {
+  const armsG  = document.getElementById('svgArms');
+  const ringG  = document.getElementById('svgRing');
+  const limbsG = document.getElementById('svgLimbs');
+
+  // ── Arms: center → each limb ──
+  positions.forEach(p => {
+    const dx = p.x - CX, dy = p.y - CY;
+    const dist = Math.sqrt(dx*dx + dy*dy);
+    const ux = dx/dist, uy = dy/dist;
+    const x1 = CX + ux*54, y1 = CY + uy*54;
+    const x2 = p.x - ux*(NODE_R+3), y2 = p.y - uy*(NODE_R+3);
+
+    // glow backing
+    armsG.appendChild(svgEl('line',{x1,y1,x2,y2,
+      stroke:'rgba(0,245,255,.08)','stroke-width':'5','stroke-linecap':'round'}));
+    // dashed line with arrow
+    armsG.appendChild(svgEl('line',{x1,y1,x2,y2,
+      stroke:'rgba(0,245,255,.4)','stroke-width':'1.2',
+      'stroke-dasharray':'5,4','stroke-linecap':'round',
+      'marker-end':'url(#arrCyan)'}));
+  });
+
+  // ── Ring connections between adjacent limbs ──
+  positions.forEach((p, i) => {
+    const q = positions[(i+1) % positions.length];
+    ringG.appendChild(svgEl('line',{x1:p.x,y1:p.y,x2:q.x,y2:q.y,
+      stroke:'rgba(124,58,237,.12)','stroke-width':'6'}));
+    ringG.appendChild(svgEl('line',{x1:p.x,y1:p.y,x2:q.x,y2:q.y,
+      stroke:'rgba(124,58,237,.4)','stroke-width':'1.2',
+      'stroke-dasharray':'6,4'}));
+  });
+
+  // ── Limb nodes ──
+  positions.forEach((p, i) => {
+    const g = svgEl('g', {'data-i': i, style:'cursor:pointer'});
+
+    // outer glow ring (hover/active)
+    const outerRing = svgEl('circle',{cx:p.x,cy:p.y,r:NODE_R+10,
+      fill:'rgba(0,245,255,.07)',stroke:'rgba(0,245,255,.18)',
+      'stroke-width':'1',opacity:'0',class:'node-outer'});
+    g.appendChild(outerRing);
+
+    // main fill
+    const mainCirc = svgEl('circle',{cx:p.x,cy:p.y,r:NODE_R,
+      fill:'url(#gNode)',stroke:'rgba(124,58,237,.6)',
+      'stroke-width':'1.8',filter:'url(#fGlow)',class:'node-main'});
+    g.appendChild(mainCirc);
+
+    // inner ring detail
+    g.appendChild(svgEl('circle',{cx:p.x,cy:p.y,r:NODE_R-7,
+      fill:'none',stroke:'rgba(124,58,237,.2)','stroke-width':'1'}));
+
+    // emoji
+    const em = svgEl('text',{x:p.x,y:p.y-7,
+      'text-anchor':'middle','dominant-baseline':'middle',
+      'font-size':'15','pointer-events':'none'});
+    em.textContent = p.emoji;
+    g.appendChild(em);
+
+    // label
+    const lbl = svgEl('text',{x:p.x,y:p.y+14,
+      'text-anchor':'middle',fill:'rgba(255,255,255,.78)',
+      'font-family':'ui-monospace,monospace',
+      'font-size':'7.5','letter-spacing':'0.8',
+      'font-weight':'700','pointer-events':'none'});
+    lbl.textContent = p.label.toUpperCase();
+    g.appendChild(lbl);
+
+    // transparent hit area
+    g.appendChild(svgEl('circle',{cx:p.x,cy:p.y,r:NODE_R+12,
+      fill:'transparent',stroke:'none'}));
+
+    g.addEventListener('mouseenter', () => hoverLimb(i, true));
+    g.addEventListener('mouseleave', () => hoverLimb(i, false));
+    g.addEventListener('click',      () => selectLimb(i));
+    g.setAttribute('tabindex','0');
+    g.setAttribute('role','button');
+    g.setAttribute('aria-label', p.label);
+    g.addEventListener('keydown', e => { if(e.key==='Enter'||e.key===' ') selectLimb(i); });
+
+    limbsG.appendChild(g);
+  });
+}
+
+// ── Interaction ──
+let selLimb = -1;
+
+function getLimbNode(i) { return document.querySelectorAll('#svgLimbs g')[i]; }
+
+function setNodeStyle(i, state) {
+  const g = getLimbNode(i);
+  if (!g) return;
+  const outer = g.querySelector('.node-outer');
+  const main  = g.querySelector('.node-main');
+  switch(state) {
+    case 'default':
+      outer.setAttribute('opacity','0');
+      outer.setAttribute('fill','rgba(0,245,255,.07)');
+      outer.setAttribute('stroke','rgba(0,245,255,.18)');
+      main.setAttribute('stroke','rgba(124,58,237,.6)');
+      main.setAttribute('stroke-width','1.8');
+      main.setAttribute('fill','url(#gNode)');
+      main.setAttribute('filter','url(#fGlow)');
+      break;
+    case 'hover':
+      outer.setAttribute('opacity','1');
+      main.setAttribute('stroke','rgba(0,245,255,.75)');
+      main.setAttribute('stroke-width','2.2');
+      main.setAttribute('filter','url(#fGlow2)');
+      break;
+    case 'active':
+      outer.setAttribute('opacity','1');
+      outer.setAttribute('fill','rgba(0,245,255,.12)');
+      outer.setAttribute('stroke','rgba(0,245,255,.45)');
+      main.setAttribute('stroke','#00f5ff');
+      main.setAttribute('stroke-width','2.5');
+      main.setAttribute('fill','url(#gNodeActive)');
+      main.setAttribute('filter','url(#fGlow2)');
+      break;
+  }
+}
+
+function hoverLimb(i, on) {
+  if (i === selLimb) return;
+  setNodeStyle(i, on ? 'hover' : 'default');
+}
+
+function selectLimb(i) {
+  if (selLimb >= 0 && selLimb !== i) setNodeStyle(selLimb, 'default');
+  selLimb = i;
+  setNodeStyle(i, 'active');
+
+  const l = LIMBS[i];
+  const panel = document.getElementById('limbPanel');
+  panel.classList.remove('empty');
+  panel.innerHTML = `
+    <h3>${l.emoji} ${l.label}</h3>
+    <p>${l.desc}</p>
+    <div class="cap-list">${l.caps.map(c=>`<span class="cap">${c}</span>`).join('')}</div>
+  `;
+  panel.scrollIntoView({ behavior:'smooth', block:'nearest' });
+}
+
+// ═══════════════════════════════════════════════
+//  PARTICLE ANIMATION
+// ═══════════════════════════════════════════════
+
+const ptHalo = document.getElementById('ptHalo');
+const ptCore = document.getElementById('ptCore');
+let ptT = 0;
+const N_POS = positions.length;
+
+function easeInOutQuad(f) {
+  // Smooth deceleration into and acceleration out of each node
+  return f < 0.5 ? 2 * f * f : 1 - Math.pow(-2 * f + 2, 2) / 2;
+}
+
+function ringPoint(t) {
+  const st  = ((t % 1) + 1) % 1;
+  const seg = st * N_POS;
+  const i0  = Math.floor(seg) % N_POS;
+  const i1  = (i0 + 1) % N_POS;
+  const f   = seg - Math.floor(seg);
+  const p0  = positions[i0], p1 = positions[i1];
+  const ef  = easeInOutQuad(f);
+  return { x: p0.x + (p1.x - p0.x) * ef, y: p0.y + (p1.y - p0.y) * ef };
+}
+
+let lastTime = 0;
+function animParticle(ts) {
+  const dt = Math.min((ts - lastTime) / 1000, .05);
+  lastTime = ts;
+  ptT = (ptT + dt * 0.155) % 1; // ~6.5 s per lap
+  const { x, y } = ringPoint(ptT);
+  ptHalo.setAttribute('cx', x);
+  ptHalo.setAttribute('cy', y);
+  ptCore.setAttribute('cx', x);
+  ptCore.setAttribute('cy', y);
+  requestAnimationFrame(animParticle);
+}
+requestAnimationFrame(ts => { lastTime = ts; requestAnimationFrame(animParticle); });
+
+// Pulse core node
+const coreCirc = document.querySelector('#coreNode circle');
+let corePhase = 0;
+setInterval(() => {
+  corePhase += .06;
+  const o = (.82 + .18 * Math.sin(corePhase)).toFixed(3);
+  if (coreCirc) coreCirc.setAttribute('opacity', o);
+}, 40);
+
+// ═══════════════════════════════════════════════
+//  MOE GRID
+// ═══════════════════════════════════════════════
+
+const cells = [];
+let activeSet = new Set();
+let selExpert = -1;
+
+function buildGrid() {
+  const grid = document.getElementById('moeGrid');
+  grid.innerHTML = '';
+  cells.length = 0;
+  for (let n = 1; n <= 64; n++) {
+    const c = document.createElement('div');
+    c.className = 'ecell off';
+    c.textContent = n;
+    c.dataset.n = n;
+    c.title = `Expert ${n}`;
+    c.addEventListener('click', () => pickExpert(n, c));
+    c.setAttribute('tabindex','0');
+    c.setAttribute('role','button');
+    c.setAttribute('aria-label',`Expert ${n}`);
+    c.addEventListener('keydown', e => { if(e.key==='Enter'||e.key===' ') pickExpert(n,c); });
+    grid.appendChild(c);
+    cells.push(c);
+  }
+  randomize(false);
+}
+
+function randomize(animate=true) {
+  const count = 15 + Math.floor(Math.random() * 6);
+  const picked = new Set();
+  while (picked.size < count) picked.add(Math.floor(Math.random()*64)+1);
+  activeSet = picked;
+
+  cells.forEach((c, idx) => {
+    const n = idx + 1;
+    const isSel = n === selExpert;
+    let base;
+    if (activeSet.has(n)) {
+      base = (n % 3 === 0) ? 'ecell on2' : 'ecell on';
+    } else {
+      base = 'ecell off';
+    }
+    c.className = isSel ? base + ' sel' : base;
+
+    if (animate) {
+      const delay = Math.random() * 180;
+      c.style.opacity = '0';
+      c.style.transform = 'scale(.7)';
+      setTimeout(() => {
+        c.style.transition = 'opacity .25s,transform .25s';
+        c.style.opacity = '';
+        c.style.transform = '';
+        setTimeout(()=>{ c.style.transition=''; }, 280);
+      }, delay);
+    }
+  });
+
+  document.getElementById('activeCount').textContent = count;
+  // Refresh expert panel if one is open
+  if (selExpert > 0) renderExpertPanel(selExpert);
+}
+
+function pickExpert(n, cell) {
+  if (selExpert > 0 && selExpert !== n) {
+    const prev = cells[selExpert-1];
+    prev.classList.remove('sel');
+  }
+  selExpert = n;
+  document.getElementById('selLabel').textContent = `#${n}`;
+  cell.classList.add('sel');
+  renderExpertPanel(n);
+  document.getElementById('expertPanel').scrollIntoView({ behavior:'smooth', block:'nearest' });
+}
+
+function renderExpertPanel(n) {
+  const panel   = document.getElementById('expertPanel');
+  const spec    = SPECIALTIES[(n-1) % SPECIALTIES.length];
+  const isOn    = activeSet.has(n);
+  const row     = Math.ceil(n/8);
+  const col     = ((n-1)%8)+1;
+  const statusCls = isOn ? 'status-on' : 'status-off';
+  const statusLbl = isOn ? '🟢 Active' : '⚪ Inactive';
+
+  panel.classList.remove('empty');
+  panel.innerHTML = `
+    <h3>Expert <span style="color:rgba(255,255,255,.5);font-weight:400;">#${n}</span></h3>
+    <div class="spec">${spec}</div>
+    <div class="expert-meta">
+      <span>Status: <b class="${statusCls}">${statusLbl}</b></span>
+      <span>Grid: <b>Row&nbsp;${row}, Col&nbsp;${col}</b></span>
+      <span>Index: <b>${n} / 64</b></span>
+      <span>Type: <b>${isOn ? (n%3===0?'Secondary':'Primary') : 'Standby'}</b></span>
+    </div>
+  `;
+}
+
+// ═══════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════
+
+buildDiagram();
+buildGrid();
+
+document.getElementById('btnRand').addEventListener('click', () => randomize(true));
+</script>
+</body>
+</html>
