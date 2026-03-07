@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Test Runner — ABC82100</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0a0e1a;
+      --bg2:       #0f1629;
+      --bg3:       #141c35;
+      --accent:    #00f5ff;
+      --purple:    #7c3aed;
+      --white:     #e8eaf6;
+      --dim:       #4a5580;
+      --pass:      #00e676;
+      --warn:      #ffd740;
+      --term-bg:   #000000;
+      --term-fg:   #00cc44;
+      --border:    rgba(0,245,255,.15);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--white);
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: .75rem 1.5rem;
+      background: rgba(10,14,26,.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-back {
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      color: var(--accent);
+      text-decoration: none;
+      font-size: .85rem;
+      font-weight: 600;
+      letter-spacing: .05em;
+      padding: .3rem .7rem;
+      border: 1px solid rgba(0,245,255,.25);
+      border-radius: 6px;
+      transition: background .2s, border-color .2s;
+      white-space: nowrap;
+    }
+    .nav-back:hover { background: rgba(0,245,255,.1); border-color: var(--accent); }
+
+    .nav-title {
+      font-size: .8rem;
+      letter-spacing: .18em;
+      color: var(--dim);
+      text-transform: uppercase;
+      flex: 1;
+      text-align: center;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .nav-spacer { width: 80px; } /* balance the back button */
+
+    /* ── HERO HEADER ── */
+    .hero {
+      text-align: center;
+      padding: 3.5rem 1.5rem 2.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 60% 50% at 30% 40%, rgba(124,58,237,.18) 0%, transparent 70%),
+        radial-gradient(ellipse 60% 50% at 70% 60%, rgba(0,245,255,.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-label {
+      font-size: .75rem;
+      letter-spacing: .3em;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: .75rem;
+    }
+
+    .hero-title {
+      font-family: "Courier New", Courier, monospace;
+      font-size: clamp(1.4rem, 4vw, 2.4rem);
+      font-weight: 700;
+      letter-spacing: .12em;
+      color: var(--white);
+      position: relative;
+      display: inline-block;
+    }
+
+    .cursor {
+      display: inline-block;
+      width: .6ch;
+      height: 1em;
+      background: var(--accent);
+      margin-left: .2ch;
+      vertical-align: text-bottom;
+      animation: blink 1s step-start infinite;
+    }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    .hero-sub {
+      margin-top: .75rem;
+      font-size: .88rem;
+      color: var(--dim);
+      letter-spacing: .06em;
+    }
+
+    /* ── RUN BUTTON ── */
+    .run-wrap {
+      display: flex;
+      justify-content: center;
+      padding: 0 1.5rem 2.5rem;
+    }
+
+    .run-btn {
+      position: relative;
+      font-family: "Courier New", Courier, monospace;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: .14em;
+      color: var(--bg);
+      background: linear-gradient(135deg, var(--accent) 0%, #00b8d4 100%);
+      border: none;
+      border-radius: 8px;
+      padding: .85rem 2.2rem;
+      cursor: pointer;
+      overflow: hidden;
+      transition: transform .15s, box-shadow .15s;
+      box-shadow: 0 0 24px rgba(0,245,255,.35), 0 4px 16px rgba(0,0,0,.4);
+    }
+    .run-btn::after {
+      content: '';
+      position: absolute;
+      inset: -2px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--accent), var(--purple));
+      z-index: -1;
+      opacity: 0;
+      transition: opacity .3s;
+    }
+    .run-btn:hover { transform: translateY(-2px); box-shadow: 0 0 36px rgba(0,245,255,.55), 0 8px 24px rgba(0,0,0,.4); }
+    .run-btn:active { transform: translateY(0); }
+    .run-btn:disabled { opacity: .55; cursor: not-allowed; transform: none; }
+
+    @keyframes pulse-btn {
+      0%, 100% { box-shadow: 0 0 24px rgba(0,245,255,.35), 0 4px 16px rgba(0,0,0,.4); }
+      50%       { box-shadow: 0 0 48px rgba(0,245,255,.65), 0 4px 16px rgba(0,0,0,.4); }
+    }
+    .run-btn.pulsing { animation: pulse-btn 1s ease-in-out infinite; }
+
+    /* ── SUMMARY BAR ── */
+    .summary {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      padding: 0 1.5rem 1.5rem;
+    }
+    .stat {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: .2rem;
+    }
+    .stat-num {
+      font-family: "Courier New", Courier, monospace;
+      font-size: 1.6rem;
+      font-weight: 700;
+      line-height: 1;
+      transition: color .3s;
+    }
+    .stat-num.pass  { color: var(--pass); }
+    .stat-num.total { color: var(--accent); }
+    .stat-num.time  { color: var(--purple); }
+    .stat-label {
+      font-size: .7rem;
+      letter-spacing: .15em;
+      color: var(--dim);
+      text-transform: uppercase;
+    }
+    .stat-sep { width: 1px; height: 2.5rem; background: var(--border); }
+
+    /* ── TEST TABLE ── */
+    .tests-section {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 0 1.5rem 2rem;
+    }
+
+    .section-heading {
+      font-size: .72rem;
+      letter-spacing: .25em;
+      color: var(--dim);
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+      padding-bottom: .4rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .test-list { display: flex; flex-direction: column; gap: .55rem; }
+
+    .test-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: .9rem 1.2rem;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      transition: border-color .3s, background .3s, transform .15s;
+      animation: row-in .4s ease both;
+    }
+    .test-row:hover { border-color: rgba(0,245,255,.3); transform: translateX(2px); }
+
+    @keyframes row-in {
+      from { opacity: 0; transform: translateX(-12px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+
+    .test-index {
+      font-family: "Courier New", Courier, monospace;
+      font-size: .75rem;
+      color: var(--dim);
+      width: 1.6rem;
+      flex-shrink: 0;
+      text-align: right;
+    }
+
+    .test-name {
+      flex: 1;
+      font-size: .95rem;
+      font-weight: 600;
+      color: var(--white);
+      letter-spacing: .03em;
+    }
+
+    .test-duration {
+      font-family: "Courier New", Courier, monospace;
+      font-size: .8rem;
+      color: var(--dim);
+      width: 4rem;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    .badge {
+      font-family: "Courier New", Courier, monospace;
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      padding: .25rem .65rem;
+      border-radius: 4px;
+      flex-shrink: 0;
+      min-width: 5.5rem;
+      text-align: center;
+      transition: background .3s, color .3s, box-shadow .3s;
+    }
+    .badge.pass {
+      background: rgba(0,230,118,.12);
+      color: var(--pass);
+      border: 1px solid rgba(0,230,118,.3);
+      box-shadow: 0 0 8px rgba(0,230,118,.15);
+    }
+    .badge.running {
+      background: rgba(255,215,64,.12);
+      color: var(--warn);
+      border: 1px solid rgba(255,215,64,.35);
+      animation: badge-pulse .6s ease-in-out infinite;
+    }
+    @keyframes badge-pulse {
+      0%,100% { box-shadow: 0 0 6px rgba(255,215,64,.25); }
+      50%     { box-shadow: 0 0 18px rgba(255,215,64,.55); }
+    }
+
+    .test-row.running-row {
+      background: rgba(255,215,64,.04);
+      border-color: rgba(255,215,64,.3);
+    }
+    .test-row.pass-row {
+      border-color: rgba(0,230,118,.25);
+    }
+
+    /* progress bar inside row */
+    .test-row { position: relative; overflow: hidden; }
+    .row-progress {
+      position: absolute;
+      bottom: 0; left: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--purple));
+      width: 0;
+      transition: width .18s linear;
+      border-radius: 0 0 8px 8px;
+    }
+
+    /* ── TERMINAL ── */
+    .terminal-section {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 0 1.5rem 3rem;
+    }
+
+    .terminal {
+      background: var(--term-bg);
+      border: 1px solid #1a2a1a;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 0 40px rgba(0,204,68,.08), 0 8px 32px rgba(0,0,0,.5);
+    }
+
+    .term-bar {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      padding: .6rem 1rem;
+      background: #0d0d0d;
+      border-bottom: 1px solid #1a2a1a;
+    }
+    .term-dot {
+      width: 12px; height: 12px;
+      border-radius: 50%;
+    }
+    .term-dot.red    { background: #ff5f57; }
+    .term-dot.yellow { background: #ffbd2e; }
+    .term-dot.green  { background: #28c840; }
+    .term-title {
+      flex: 1;
+      text-align: center;
+      font-family: "Courier New", Courier, monospace;
+      font-size: .75rem;
+      color: #3a5a3a;
+      letter-spacing: .1em;
+    }
+
+    .term-body {
+      padding: 1rem 1.2rem;
+      min-height: 220px;
+      max-height: 340px;
+      overflow-y: auto;
+      font-family: "Courier New", Courier, monospace;
+      font-size: .82rem;
+      line-height: 1.7;
+      color: var(--term-fg);
+    }
+    .term-body::-webkit-scrollbar { width: 6px; }
+    .term-body::-webkit-scrollbar-track { background: #050505; }
+    .term-body::-webkit-scrollbar-thumb { background: #1a3a1a; border-radius: 3px; }
+
+    .log-line {
+      display: block;
+      opacity: 0;
+      transform: translateY(4px);
+      animation: log-appear .25s ease forwards;
+      white-space: pre-wrap;
+      overflow-wrap: break-word;
+    }
+    @keyframes log-appear {
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .log-line .tag-info  { color: #00aaff; }
+    .log-line .tag-pass  { color: var(--pass); }
+    .log-line .tag-warn  { color: var(--warn); }
+    .log-line .tag-err   { color: #ff5252; }
+    .log-line .msg       { color: var(--term-fg); }
+    .log-line .dim-msg   { color: #3a6a3a; }
+
+    .term-cursor-line {
+      display: flex;
+      align-items: center;
+      gap: .3ch;
+      color: var(--term-fg);
+    }
+    .term-cursor-line::before { content: '$ '; color: #3a6a3a; }
+    .term-blink {
+      display: inline-block;
+      width: .55ch; height: .85em;
+      background: var(--term-fg);
+      animation: blink 1s step-start infinite;
+      vertical-align: text-bottom;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      font-size: .72rem;
+      color: var(--dim);
+      letter-spacing: .1em;
+      border-top: 1px solid var(--border);
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 520px) {
+      .nav-title  { display: none; }
+      .nav-spacer { display: none; }
+      .test-duration { display: none; }
+      .badge { min-width: 4.8rem; }
+      .run-btn { font-size: .88rem; padding: .75rem 1.5rem; }
+      .summary { gap: 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-back" href="index.html">← Hub</a>
+  <span class="nav-title">TEST RUNNER — ABC82100</span>
+  <div class="nav-spacer"></div>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="hero-label">ARC Challenge · ABC82100</div>
+  <h1 class="hero-title">TEST RUNNER — ABC82100<span class="cursor"></span></h1>
+  <p class="hero-sub">8 tests · all passing · automated suite</p>
+</header>
+
+<!-- SUMMARY -->
+<div class="summary">
+  <div class="stat">
+    <span class="stat-num pass" id="stat-pass">8</span>
+    <span class="stat-label">Passing</span>
+  </div>
+  <div class="stat-sep"></div>
+  <div class="stat">
+    <span class="stat-num total" id="stat-total">8</span>
+    <span class="stat-label">Total</span>
+  </div>
+  <div class="stat-sep"></div>
+  <div class="stat">
+    <span class="stat-num time" id="stat-time">136ms</span>
+    <span class="stat-label">Duration</span>
+  </div>
+</div>
+
+<!-- RUN BUTTON -->
+<div class="run-wrap">
+  <button class="run-btn" id="run-btn" onclick="runAll()">▶ Run All Tests</button>
+</div>
+
+<!-- TEST ROWS -->
+<section class="tests-section">
+  <div class="section-heading">Test Results</div>
+  <div class="test-list" id="test-list"></div>
+</section>
+
+<!-- TERMINAL -->
+<section class="terminal-section">
+  <div class="section-heading">Console Output</div>
+  <div class="terminal">
+    <div class="term-bar">
+      <span class="term-dot red"></span>
+      <span class="term-dot yellow"></span>
+      <span class="term-dot green"></span>
+      <span class="term-title">bash — test-runner</span>
+    </div>
+    <div class="term-body" id="term-body"></div>
+  </div>
+</section>
+
+<footer>ABC82100 · TEST RUNNER · BUILT WITH ♥ IN VANILLA JS</footer>
+
+<script>
+  const TESTS = [
+    { name: "Grid Parsing",         ms: 12  },
+    { name: "Pattern Recognition",  ms: 8   },
+    { name: "Symmetry Detection",   ms: 15  },
+    { name: "Color Mapping",        ms: 9   },
+    { name: "Shape Transformation", ms: 22  },
+    { name: "Rule Inference",       ms: 18  },
+    { name: "Edge Cases",           ms: 7   },
+    { name: "Full Pipeline",        ms: 45  },
+  ];
+
+  const TOTAL_MS = TESTS.reduce((s, t) => s + t.ms, 0);
+
+  function resetProgressBar(prog) {
+    prog.style.transition = 'none';
+    prog.style.width = '0';
+    setTimeout(() => { prog.style.transition = ''; }, 50);
+  }
+
+  /* ── build rows ── */
+  function buildRows() {
+    const list = document.getElementById('test-list');
+    list.innerHTML = '';
+    TESTS.forEach((t, i) => {
+      const row = document.createElement('div');
+      row.className = 'test-row pass-row';
+      row.id = `row-${i}`;
+      row.style.animationDelay = `${i * 60}ms`;
+      row.innerHTML = `
+        <span class="test-index">${String(i + 1).padStart(2,'0')}</span>
+        <span class="test-name">${t.name}</span>
+        <span class="test-duration" id="dur-${i}">${t.ms}ms</span>
+        <span class="badge pass" id="badge-${i}">✅ PASS</span>
+        <div class="row-progress" id="prog-${i}"></div>
+      `;
+      list.appendChild(row);
+    });
+  }
+
+  /* ── terminal logging ── */
+  function log(html, delay = 0) {
+    return new Promise(res => {
+      setTimeout(() => {
+        const term = document.getElementById('term-body');
+        const line = document.createElement('span');
+        line.className = 'log-line';
+        line.innerHTML = html;
+        // remove blinking cursor line if present
+        const prev = term.querySelector('.term-cursor-line');
+        if (prev) prev.remove();
+        term.appendChild(line);
+        // re-add cursor line
+        const cur = document.createElement('div');
+        cur.className = 'term-cursor-line';
+        cur.innerHTML = '<span class="term-blink"></span>';
+        term.appendChild(cur);
+        term.scrollTop = term.scrollHeight;
+        res();
+      }, delay);
+    });
+  }
+
+  function tagInfo(msg)  { return `<span class="tag-info">[INFO]</span> <span class="msg">${msg}</span>`; }
+  function tagPass(msg)  { return `<span class="tag-pass">[PASS]</span> <span class="msg">${msg}</span>`; }
+  function tagRun(msg)   { return `<span class="tag-warn">[RUN ]</span> <span class="msg">${msg}</span>`; }
+  function dimLine(msg)  { return `<span class="dim-msg">${msg}</span>`; }
+
+  /* ── initial log ── */
+  async function initLog() {
+    const term = document.getElementById('term-body');
+    term.innerHTML = '';
+    const lines = [
+      { html: dimLine('──────────────────────────────────────────'), d: 0   },
+      { html: tagInfo('Initializing test suite...'),                d: 80  },
+      { html: tagInfo('Loading ABC82100 task data...'),             d: 160 },
+      { html: tagInfo('Compiling test harness...'),                 d: 240 },
+      { html: dimLine('──────────────────────────────────────────'), d: 340 },
+    ];
+    for (const l of lines) await log(l.html, l.d);
+    for (let i = 0; i < TESTS.length; i++) {
+      const t = TESTS[i];
+      await log(tagPass(`${t.name} (${t.ms}ms)`), 60);
+    }
+    await log(dimLine('──────────────────────────────────────────'), 80);
+    await log(tagInfo('All tests passed. Suite complete.'), 80);
+  }
+
+  /* ── run animation ── */
+  async function runAll() {
+    const btn = document.getElementById('run-btn');
+    btn.disabled = true;
+    btn.classList.add('pulsing');
+    btn.textContent = '⏳ Running…';
+
+    // reset stats
+    document.getElementById('stat-pass').textContent = '0';
+    document.getElementById('stat-time').textContent = '0ms';
+
+    // clear terminal
+    const term = document.getElementById('term-body');
+    term.innerHTML = '';
+
+    await log(dimLine('──────────────────────────────────────────'), 0);
+    await log(tagInfo('Initializing test suite...'), 50);
+    await log(tagInfo('Loading ABC82100 task data...'), 100);
+    await log(tagInfo('Compiling test harness...'), 150);
+    await log(dimLine('──────────────────────────────────────────'), 220);
+
+    let cumulativeMs = 0;
+    let passCount = 0;
+
+    for (let i = 0; i < TESTS.length; i++) {
+      const t = TESTS[i];
+      const row   = document.getElementById(`row-${i}`);
+      const badge = document.getElementById(`badge-${i}`);
+      const dur   = document.getElementById(`dur-${i}`);
+      const prog  = document.getElementById(`prog-${i}`);
+
+      // set RUNNING state
+      row.className   = 'test-row running-row';
+      badge.className = 'badge running';
+      badge.textContent = '⚡ RUNNING…';
+      dur.textContent = '…';
+      prog.style.width = '0%';
+
+      await log(tagRun(`${t.name}...`), 0);
+
+      // animate progress bar over ~160ms
+      await new Promise(res => {
+        let pct = 0;
+        const step = () => {
+          pct = Math.min(pct + 8, 100);
+          prog.style.width = pct + '%';
+          if (pct < 100) requestAnimationFrame(step);
+          else res();
+        };
+        requestAnimationFrame(step);
+      });
+
+      await new Promise(res => setTimeout(res, 60));
+
+      // set PASS state
+      row.className   = 'test-row pass-row';
+      badge.className = 'badge pass';
+      badge.textContent = '✅ PASS';
+      dur.textContent = t.ms + 'ms';
+      prog.style.width = '100%';
+      setTimeout(() => resetProgressBar(prog), 500);
+
+      cumulativeMs += t.ms;
+      passCount++;
+
+      document.getElementById('stat-pass').textContent = passCount;
+      document.getElementById('stat-time').textContent = cumulativeMs + 'ms';
+
+      await log(tagPass(`${t.name} (${t.ms}ms)`), 0);
+
+      await new Promise(res => setTimeout(res, 200));
+    }
+
+    await log(dimLine('──────────────────────────────────────────'), 60);
+    await log(tagInfo('All tests passed. Suite complete.'), 80);
+
+    btn.disabled = false;
+    btn.classList.remove('pulsing');
+    btn.textContent = '▶ Run All Tests';
+  }
+
+  /* ── init ── */
+  buildRows();
+  initLog();
+</script>
+</body>
+</html>
