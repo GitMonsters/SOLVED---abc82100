@@ -671,7 +671,7 @@ function ringPoint(t) {
   const f   = seg - Math.floor(seg);
   const p0  = positions[i0], p1 = positions[i1];
   // Smooth the corners with a tiny ease
-  const ef  = f < .5 ? 2*f*f : 1 - Math.pow(-2*f+2,2)/2;
+  const ef  = f < .5 ? 2*f*f : 1 - Math.pow(-2*f+2,2)/2; // easeInOutQuad: smooth deceleration into and acceleration out of each node
   return { x: p0.x + (p1.x - p0.x) * ef, y: p0.y + (p1.y - p0.y) * ef };
 }
 
