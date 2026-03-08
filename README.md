@@ -1,7 +1,11 @@
 <div align="center">
 
 
-Uploading TRANSCENDPLEXITY.mp4…
+Uploading bigBang.mp4…
+
+
+
+https://github.com/user-attachments/assets/125ac24f-3841-489a-a00c-f82bf38daa59
 
 
 <br>
@@ -403,7 +407,11 @@ SOLVED---abc82100/
 
 <br>
 
----
+
+
+Uploading TRANSCENDPLEXITY.mp4…
+
+
 
 <div align="center">
 
