@@ -120,6 +120,27 @@ TranscendPlexity uses **LLM-guided program synthesis** to solve ARC tasks:
 
 ---
 
+## 🎮 ARC-AGI-3: Interactive Game Solving
+
+ARC-AGI-3 is fundamentally different — instead of static grid puzzles, it presents **interactive game environments** with hidden physics. You can't write a `solve(grid)` function for a game. You need an autonomous agent.
+
+Our **OctoTetraAgent** (`arc3/` package — [view source](https://github.com/GitMonsters/SOLVED-540-of-540/tree/main/arc3)):
+
+- **Reverse-engineered** 3,700 lines of obfuscated game source code
+- **Decoded hidden physics** — gravity, toggle mechanics, navigation constraints
+- **Built game solvers** — A*, symbolic BFS, GF(2) linear algebra for lights-out puzzles
+- **Completed 20/20 levels** across 3 games (FT09, LS20, VC33) from a **six-word prompt** with **zero human guidance**
+
+| Component | What It Does |
+|:----------|:------------|
+| **StateGraph BFS** | Builds a graph of game states + transitions, finds shortest solution |
+| **GF(2) Toggle Solver** | Linear algebra over GF(2) for lights-out style puzzles |
+| **Splash Detection** | Auto-dismisses level transitions to chain solves |
+| **Semantic State Extraction** | Parses game frames into structured representations |
+
+<br>
+---
+
 ## 🔥 The 13 "Impossible" Tasks
 
 These 13 ARC-AGI-2 tasks have a **0% solve rate** across all known AI systems — GPT-4o, Claude 3.5, Gemini 1.5, NVARC, and every Kaggle submission.
