@@ -1,6 +1,15 @@
-<div align="center">
+Verify and it's just doing it all get up there get it up there<div align="center">
 
-<!-- Banner -->
+## 🚀 Reproduce the Results
+
+- **Step 1: Clone the Repo**
+  `git clone https://github.com/GitMonsters/SOLVED---abc82100.git`
+- **Step 2: Run the Reproducer**
+  `python repro_all.py`
+- **Step 3: Verify Results**
+  Review the terminal output to confirm the 100% solve rate for the flagship abc82100 task.
+
+---<!-- Banner -->
 <img src="banner.svg" alt="TranscendPlexity — 540/540 ARC-AGI" width="800">
 
 <br><br>
