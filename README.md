@@ -1,4 +1,4 @@
-Verify and it's just doing it all get up there get it up there<div align="center">
+<div align="center">
 
 ## 🚀 Reproduce the Results
 
