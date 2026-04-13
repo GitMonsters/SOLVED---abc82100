@@ -8,7 +8,7 @@
     These flows 'braid' together to ensure 100% deterministic accuracy.
     
     ## 3. Compounding Integration
-    Unlike standard ensembles, Compounding Integration layers simple geometric 'Simplexity Units' into a non-linear torus architecture. This allows for 510^{164} state-spaces by integrating localized deterministic rules into a global solution.
+    Unlike standard ensembles, Compounding Integration layers simple geometric 'Simplexity Units' into a non-linear torus architecture. This allows for '5 x 10^{164}' state-spaces by integrating localized deterministic rules into a global solution.
     
     ## 4. Evidence
     Refer to `repro_all.py` for verification of these principles in action on the flagship abc82100 task.
