@@ -9,7 +9,8 @@ Verify and it's just doing it all get up there get it up there<div align="center
 - **Step 3: Verify Results**
   Review the terminal output to confirm the 100% solve rate for the flagship abc82100 task.
 
----<!-- Banner -->
+---
+<!-- Banner -->
 <img src="banner.svg" alt="TranscendPlexity — 540/540 ARC-AGI" width="800">
 
 <br><br>
