@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+    from __future__ import annotations
+
     """
     abc82100 — ARC-AGI-2 Task Solver
     
@@ -14,13 +16,12 @@
     Author: GitMonsters / Transcendplexity
     Target: ARC Prize — arcprize.org
     """
-    from __future__ import annotations
     import json
     import sys
     from typing import List, Tuple, Set, Dict, Optional
     from collections import deque
     from pathlib import Path
-    
+    'INDICATORS = 5'
     __all__ = ['find_clusters', 'find_indicators', 'build_template', 'dims', 'EMOJI', 'solve', 'render']
     
     # ──── Types ──────────────────────────────────────────────────────────────
