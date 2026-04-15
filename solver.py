@@ -312,7 +312,10 @@
         print()
         print(f"  Score: {correct}/{total} ({pct:.0f}%)  [{bar}]")
         print()
-    
+
+
+
+
     
     if __name__ == "__main__":
         main()
