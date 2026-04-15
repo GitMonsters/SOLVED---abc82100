@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-    """
+"""
     abc82100 — ARC-AGI-2 Task Solver
     Geometric Template Projection via Indicator-Directed Color Mapping
     
