@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
     """
-    abc82100 — ARC-AGI-2 Task Solver
+    abc82100 - ARC-AGI-2 Task Solver
     Geometric Template Projection via Indicator-Directed Color Mapping
     
     Algorithm:
-      ① Find cyan-8 connected components (geometric templates)
-      ② Decode indicator pairs (proximity → color role mapping)
-      ③ Build offset templates relative to entry cell
-      ④ Locate source cells matching the source color
-      ⑤ Stamp template shape at each source in output color, clear originals
+    ① Find cyan-8 connected components (geometric templates)
+    ② Decode indicator pairs (proximity - color role mapping)
+    ③ Build offset templates relative to entry cell
+    ④ Locate source cells matching the source color
+    ⑤ Stamp template shape at each source in output color, clear originals
     
     Author: GitMonsters / Transcendplexity
-    Target: ARC Prize — arcprize.org
+    Target: ARC Prize - arcprize.org
     """
     
     from __future__ import annotations
@@ -23,300 +23,179 @@
     
     __all__ = ['find_clusters', 'find_indicators', 'build_template', 'dims', 'EMOJI', 'solve', 'render']
     
-    # ──── Constants & Types ──────────────────────────────────────────────────
-    
-    INDICATORS = 5
-    Grid = List[List[int]]
-    Point = Tuple[int, int]
-    
+    # Constants & Tunables
+    INDICATORS = {} # Will be populated by find_indicators
+    B = (0, 0, 0) # Black
     EMOJI = {
-        0: "⬛", 1: "🔵", 2: "🔴", 3: "🟢", 4: "🟨",
-        5: "⬜", 6: "🟪", 7: "🟧", 8: "🔷", 9: "🟤",
+    (0,0,0):"⬛", (0,0,255):"🟦", (255,0,0):"🟥", (0,255,0):"🟩",
+    (255,255,0):"🟨", (128,128,128):"⬜", (255,165,0):"🟧",
+    (165,42,42):"🟫", (255,0,255):"🟪", (0,255,255):"🩵",
+    (255,255,255):"⚪",
+    10:"❓" # Unknown or default
     }
+    def dims(grid):
+    return len(grid), len(grid[0]) if grid else 0
+    
+    def find_clusters(grid, color):
+    H, W = dims(grid)
+    visited = set()
+    clusters = []
+    for r in range(H):
+    for c in range(W):
+    if grid[r][c] == color and (r, c) not in visited:
+    cluster = set()
+    q = deque([(r, c)])
+    visited.add((r, c))
+    cluster.add((r, c))
+    while q:
+    curr_r, curr_c = q.popleft()
+    for dr in [-1, 0, 1]:
+    for dc in [-1, 0, 1]:
+    if dr == 0 and dc == 0: continue
+    nr, nc = curr_r + dr, curr_c + dc
+    if 0 <= nr < H and 0 <= nc < W and grid[nr][nc] == color and (nr, nc) not in visited:
+    visited.add((nr, nc))
+    cluster.add((nr, nc))
+    q.append((nr, nc))
+    clusters.append(cluster)
+    return clusters
+    
+    def find_indicators(grid):
+    global INDICATORS
+    H, W = dims(grid)
+    INDICATORS = {}
+    indicator_color = (0, 255, 255) # Cyan
+    
+    cyan_clusters = find_clusters(grid, indicator_color)
+    
+    for cluster in cyan_clusters:
+    min_r, min_c = min(r for r,c in cluster), min(c for r,c in cluster)
+    max_r, max_c = max(r for r,c in cluster), max(c for r,c in cluster)
+    
+    if max_r - min_r == 2 and max_c - min_c == 2: # 3x3 indicator block
+    # Check for 3x3 square of cyan
+    is_3x3 = True
+    for r in range(min_r, max_r + 1):
+    for c in range(min_c, max_c + 1):
+    if (r,c) not in cluster:
+    is_3x3 = False; break
+    if not is_3x3: continue
+    
+    center_r, center_c = min_r + 1, min_c + 1
+    # Look around the 3x3 block for source/target colors
+    found_pair = False
+    for dr_s, dc_s in [(0,-2), (0,2), (-2,0), (2,0), (-2,-2), (-2,2), (2,-2), (2,2)]: # Relative to center
+    sr, sc = center_r + dr_s, center_c + dc_s
+    if 0 <= sr < H and 0 <= sc < W and grid[sr][sc] != B and grid[sr][sc] != indicator_color:
+    source_color = grid[sr][sc]
+    # Look for target color adjacent to source
+    for dr_t, dc_t in [(-1,0), (1,0), (0,-1), (0,1)]: # Adjacent to source
+    tr, tc = sr + dr_t, sc + dc_t
+    if 0 <= tr < H and 0 <= tc < W and grid[tr][tc] != B and grid[tr][tc] != indicator_color and grid[tr][tc] != source_color:
+    target_color = grid[tr][tc]
+    INDICATORS[source_color] = (target_color, cluster)
+    found_pair = True
+    break
+    if found_pair: break
+    
+    def build_template(cluster):
+    min_r = min(r for r, c in cluster)
+    min_c = min(c for r, c in cluster)
+    template = set((r - min_r, c - min_c) for r, c in cluster)
+    return template, (min_r, min_c)
+    
+    def solve(grid):
+    find_indicators(grid)
+    H, W = dims(grid)
+    output_grid = [row[:] for row in grid]
+    
+    templates = {}
+    for src_color, (tgt_color, cluster) in INDICATORS.items():
+    template, (min_r, min_c) = build_template(cluster)
+    templates[src_color] = (tgt_color, template, (min_r, min_c))
+    
+    for r in range(H):
+    for c in range(W):
+    cell_color = grid[r][c]
+    if cell_color in templates:
+    tgt_color, template, (min_r, min_c) = templates[cell_color]
+    # Check if template fits and matches source color at (r,c) origin
+    origin_in_template = (r-min_r, c-min_c)
+    match = True
+    apply_coords = []
+    clear_coords = []
+    
+    if (0,0) in template: # Template is relative to its own min_r, min_c
+    base_r, base_c = r, c # Origin is the cell we found
+    else: # Should not happen if template is built relative to min_r, min_c
+    continue # Or adjust logic
+    
+    for dr, dc in template:
+    nr, nc = base_r + dr, base_c + dc
+    if not (0 <= nr < H and 0 <= nc < W):
+    match = False; break
+    if grid[nr][nc] == cell_color : # Part of the source shape
+    apply_coords.append((nr,nc))
+    clear_coords.append((nr,nc))
+    elif grid[nr][nc] == B : # Background, can overwrite
+    apply_coords.append((nr,nc))
+    else: # Obstructed
+    match=False; break
     
     
-    # ──── Grid Utilities ─────────────────────────────────────────────────────
+    if match:
+    for nr, nc in apply_coords:
+    output_grid[nr][nc] = tgt_color
+    # No clearing originals in this version to match task desc
     
-    def dims(g: Grid) -> Tuple[int, int]:
-        return len(g), len(g[0])
+    return output_grid
     
+    def render(grid):
+    return "\n".join("".join(EMOJI.get(c, "?") for c in row) for row in grid)
     
-    def copy_grid(g: Grid) -> Grid:
-        return [row[:] for row in g]
-    
-    
-    def adj8(r: int, c: int, H: int, W: int) -> List[Point]:
-        """8-connected neighbors."""
-        return [
-            (r + dr, c + dc)
-            for dr in (-1, 0, 1) for dc in (-1, 0, 1)
-            if (dr or dc) and 0 <= r + dr < H and 0 <= c + dc < W
-        ]
-    
-    
-    def adj4(r: int, c: int, H: int, W: int) -> List[Point]:
-        """4-connected neighbors."""
-        return [
-            (r + dr, c + dc)
-            for dr, dc in [(-1, 0), (1, 0), (0, -1), (0, 1)]
-            if 0 <= r + dr < H and 0 <= c + dc < W
-        ]
-    
-    
-    # ──── ① Cluster Detection ───────────────────────────────────────────────
-    
-    B = 0
-    def find_clusters(grid: Grid, color: int = 8) -> List[Set[Point]]:
-        """BFS flood-fill to find 8-connected components of given color."""
-        H, W = dims(grid)
-        seen: Set[Point] = set()
-        clusters = []
-    
-        for r in range(H):
-            for c in range(W):
-                if grid[r][c] == color and (r, c) not in seen:
-                    cluster: Set[Point] = set()
-                    q = deque([(r, c)])
-                    seen.add((r, c))
-                    while q:
-                        cr, cc = q.popleft()
-                        cluster.add((cr, cc))
-                        for nr, nc in adj8(cr, cc, H, W):
-                            if (nr, nc) not in seen and grid[nr][nc] == color:
-                                seen.add((nr, nc))
-                                q.append((nr, nc))
-                    clusters.append(cluster)
-    
-        return clusters
-    
-    
-    # ──── ② Indicator Pair Decoding ──────────────────────────────────────────
-    
-    def min_dist(p: Point, cluster: Set[Point]) -> int:
-        """Manhattan distance from point to nearest cell in cluster."""
-        return min(abs(p[0] - cr) + abs(p[1] - cc) for cr, cc in cluster)
-    
-    
-    def find_indicators(
-        grid: Grid, clusters: List[Set[Point]]
-    ) -> List[Dict]:
-        """
-        For each cluster, find the adjacent indicator pair.
-        Closer cell → output_color, farther → source_color.
-        """
-        H, W = dims(grid)
-        all_cyan = set()
-        for cl in clusters:
-            all_cyan.update(cl)
-    
-        # Find non-zero, non-8 cells adjacent to any cluster cell
-        indicators = []
-        used: Set[Point] = set()
-    
-        for ci, cluster in enumerate(clusters):
-            # Cells in the 8-neighborhood of the cluster
-            border: Set[Point] = set()
-            for cr, cc in cluster:
-                for nr, nc in adj8(cr, cc, H, W):
-                    if (nr, nc) not in cluster and grid[nr][nc] not in (0, 8):
-                        border.add((nr, nc))
-    
-            # Find pairs: two different-colored cells where one is in border
-            best_pair = None
-            best_dist = 999
-    
-            for p1 in border:
-                if p1 in used:
-                    continue
-                c1 = grid[p1[0]][p1[1]]
-                # Look for partner adjacent to p1 with different color
-                for p2 in adj4(p1[0], p1[1], H, W):
-                    if p2 in used or p2 in all_cyan:
-                        continue
-                    c2 = grid[p2[0]][p2[1]]
-                    if c2 == 0 or c2 == 8 or c2 == c1:
-                        continue
-    
-                    d1 = min_dist(p1, cluster)
-                    d2 = min_dist(p2, cluster)
-                    total = d1 + d2
-    
-                    if total < best_dist:
-                        best_dist = total
-                        if d1 <= d2:
-                            best_pair = (p1, c1, p2, c2)  # p1 closer
-                        else:
-                            best_pair = (p2, c2, p1, c1)  # p2 closer
-    
-            if best_pair:
-                closer, out_color, farther, src_color = best_pair
-                used.add(closer)
-                used.add(farther)
-    
-                # Entry = cyan cell nearest to the closer indicator
-                entry = min(cluster, key=lambda p: abs(p[0] - closer[0]) + abs(p[1] - closer[1]))
-    
-                indicators.append({
-                    "cluster_idx": ci,
-                    "output_color": out_color,
-                    "source_color": src_color,
-                    "entry": entry,
-                    "indicator_cells": {closer, farther},
-                })
-    
-        return indicators
-    
-    
-    # ──── ③ Template Building ────────────────────────────────────────────────
-    
-    def build_template(cluster: Set[Point], entry: Point) -> List[Point]:
-        """Compute template as offsets relative to entry cell."""
-        er, ec = entry
-        return [(r - er, c - ec) for r, c in cluster]
-    
-    
-    # ──── ④ Source Finding ───────────────────────────────────────────────────
-    
-    def find_sources(grid: Grid, color: int, exclude: Set[Point]) -> List[Point]:
-        """All cells of given color not in exclude set."""
-        H, W = dims(grid)
-        return [
-            (r, c) for r in range(H) for c in range(W)
-            if grid[r][c] == color and (r, c) not in exclude
-        ]
-    
-    
-    # ──── ⑤ Stamp & Compose ─────────────────────────────────────────────────
-    
-    def solve(input_grid: Grid) -> Grid:
-        """
-        Main solver: Template Stamping via Indicator-Directed Projection.
-    
-            INPUT → clusters → indicators → templates → sources → stamp → OUTPUT
-        """
-        H, W = dims(input_grid)
-        output = copy_grid(input_grid)
-    
-        clusters = find_clusters(input_grid, color=8)
-        indicators = find_indicators(input_grid, clusters)
-    
-        # Collect all cells to clear
-        clear: Set[Point] = set()
-        for cl in clusters:
-            clear.update(cl)
-    
-        for ind in indicators:
-            cluster = clusters[ind["cluster_idx"]]
-            template = build_template(cluster, ind["entry"])
-            clear.update(ind["indicator_cells"])
-    
-            sources = find_sources(input_grid, ind["source_color"], ind["indicator_cells"])
-            clear.update(sources)
-    
-            # Stamp template at each source position
-            for sr, sc in sources:
-                for dr, dc in template:
-                    nr, nc = sr + dr, sc + dc
-                    if 0 <= nr < H and 0 <= nc < W:
-                        output[nr][nc] = ind["output_color"]
-    
-        # Clear template, indicator, and source cells
-        for r, c in clear:
-            if 0 <= r < H and 0 <= c < W:
-                output[r][c] = 0
-    
-        return output
-    
-    
-    # ──── Visualization ─────────────────────────────────────────────────────
-    
-    def render(grid: Grid) -> str:
-        return "
-".join("".join(EMOJI.get(c, "?") for c in row) for row in grid)
-    
-    
-    def diff_grids(expected: Grid, actual: Grid) -> str:
-        """Show side-by-side diff with markers for mismatches."""
-        H, W = dims(expected)
-        lines = []
-        mismatches = 0
-        for r in range(H):
-            exp_row = "".join(EMOJI.get(expected[r][c], "?") for c in range(W))
-            act_row = "".join(EMOJI.get(actual[r][c], "?") for c in range(W))
-            match = expected[r] == actual[r]
-            marker = "  ✓" if match else "  ✗"
-            if not match:
-                mismatches += sum(1 for c in range(W) if expected[r][c] != actual[r][c])
-            lines.append(f"  {exp_row}  │  {act_row}{marker}")
-        return "
-".join(lines), mismatches
-    
-    
-    # ──── CLI Entry Point ───────────────────────────────────────────────────
+    def diff_grids(expected, actual):
+    exp_lines = render(expected).split('\n')
+    act_lines = render(actual).split('\n')
+    max_len = max(len(el) for el in exp_lines + act_lines)
+    lines = []
+    mismatches = 0
+    for i, (el, al) in enumerate(zip(exp_lines, act_lines)):
+    line = f"{i:02d}: {el.ljust(max_len)} | {al.ljust(max_len)}"
+    if el != al:
+    line += "  <-- MISMATCH"
+    mismatches += 1
+    lines.append(line)
+    return "\n".join(lines), mismatches
     
     def main():
-        visual = "--visual" in sys.argv
-        task_path = Path("task.json")
+    if len(sys.argv) < 2:
+    print("Usage: python solver.py <path_to_task_file.json>")
+    return
+    task_file = Path(sys.argv[1])
+    with open(task_file, 'r') as f:
+    task = json.load(f)
     
-        if not task_path.exists():
-            print("  ✗ task.json not found — run from the repo root")
-            sys.exit(1)
+    for i, test_pair in enumerate(task['train']):
+    inp = test_pair['input']
+    exp = test_pair['output']
+    pred = solve(inp)
+    diff, mismatches = diff_grids(exp, pred)
+    print(f"--- Train {i} --- Mismatches: {mismatches}")
+    if mismatches > 0:
+    print(diff)
+    for line in render(pred).split("\n"):
+    print(line)
     
-        task = json.loads(task_path.read_text())
     
-        print()
-        print("  ╔══════════════════════════════════════════════╗")
-        print("  ║     abc82100 — Geometric Template Solver      ║")
-        print("  ╚══════════════════════════════════════════════╝")
-        print()
+    print("\n--- Test ---")
+    for i, test_pair in enumerate(task['test']):
+    inp = test_pair['input']
+    pred = solve(inp)
+    print(f"--- Test {i} Output ---")
+    for line in render(pred).split("\n"):
+    print(line)
     
-        total, correct = 0, 0
     
-        for i, ex in enumerate(task["train"]):
-            pred = solve(ex["input"])
-            match = pred == ex["output"]
-            total += 1
-            correct += int(match)
-            H, W = dims(pred)
-            status = "✅" if match else "❌"
-            print(f"  {status} Train {i}  ({H:>2}×{W:<2})")
-    
-            if visual and not match:
-                diff, n = diff_grids(ex["output"], pred)
-                print(f"     Expected  │  Got  ({n} mismatched cells)")
-                print(diff)
-                print()
-    
-        for i, ex in enumerate(task["test"]):
-            pred = solve(ex["input"])
-            H, W = dims(pred)
-            if "output" in ex:
-                match = pred == ex["output"]
-                total += 1
-                correct += int(match)
-                status = "✅" if match else "❌"
-            else:
-                status = "🔮"
-            print(f"  {status} Test  {i}  ({H:>2}×{W:<2})")
-    
-            if visual:
-                print()
-                print("  Predicted:")
-                for line in render(pred).split("
-"):
-                    print(f"    {line}")
-                print()
-    
-        pct = 100 * correct / total if total else 0
-        bar = "█" * correct + "░" * (total - correct)
-        print()
-        print(f"  Score: {correct}/{total} ({pct:.0f}%)  [{bar}]")
-        print()
-
-
-
-
-    
-    if __name__ == "__main__":
-        main()
+    if __name__ == '__main__':
+    main()
     
