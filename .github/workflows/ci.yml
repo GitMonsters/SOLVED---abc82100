@@ -15,8 +15,6 @@ jobs:
 
       - name: Install dependencies
         run: |
-          /opt/homebrew/bin/python3.12 -m pip install --upgrade pip --break-system-packages -q
-          if [ -f requirements.txt ]; then /opt/homebrew/bin/python3.12 -m pip install -r requirements.txt --break-system-packages -q; fi
           /opt/homebrew/bin/python3.12 -m pip install pytest --break-system-packages -q
 
       - name: Run tests
