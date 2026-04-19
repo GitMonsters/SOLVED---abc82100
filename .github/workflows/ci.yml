@@ -9,24 +9,16 @@ on:
 jobs:
   test:
     runs-on: self-hosted
-    strategy:
-      matrix:
-        python-version: ["3.11", "3.12"]
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python-version }}
-
       - name: Install dependencies
         run: |
-          python3 -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then pip3 install -r requirements.txt; fi
-          pip3 install pytest
+          /opt/homebrew/bin/python3.12 -m pip install --upgrade pip --break-system-packages -q
+          if [ -f requirements.txt ]; then /opt/homebrew/bin/python3.12 -m pip install -r requirements.txt --break-system-packages -q; fi
+          /opt/homebrew/bin/python3.12 -m pip install pytest --break-system-packages -q
 
       - name: Run tests
         run: |
-          pytest -q
+          /opt/homebrew/bin/python3.12 -m pytest -q
