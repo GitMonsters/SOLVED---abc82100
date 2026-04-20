@@ -201,7 +201,7 @@ def solve(input_grid: Grid) -> Grid:
 
     return output
 
-# ──── Visualization ─────────────────────────────────────────────────────────
+# ──── Visualization ───────────────────────────────────────────────────────
 def render(grid: Grid) -> str:
     return "\n".join("".join(EMOJI.get(c, "?") for c in row) for row in grid)
 
